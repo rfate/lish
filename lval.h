@@ -30,6 +30,7 @@ lval_t* lval_qexpr(void);
 
 void    lval_del(lval_t*);
 lval_t* lval_add(lval_t*, lval_t*);
+lval_t* lval_join(lval_t*, lval_t*);
 
 lval_t* lval_read_num(mpc_ast_t*);
 lval_t* lval_read(mpc_ast_t*);

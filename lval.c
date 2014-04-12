@@ -173,7 +173,7 @@ lval_t* lval_eval_sexpr(lval_t* v) {
     return lval_err("sexp does not begin with symbol");
   }
 
-  lval_t* result = builtin_op(v, f->sym);
+  lval_t* result = builtin(v, f->sym);
   lval_del(f);
   return result;
 }
@@ -200,6 +200,15 @@ lval_t* lval_pop(lval_t* v, int i) {
 lval_t* lval_take(lval_t* v, int i) {
   lval_t* x = lval_pop(v, i);
   lval_del(v);
+
+  return x;
+}
+
+lval_t* lval_join(lval_t* x, lval_t* y) {
+  while (y->count)
+    x = lval_add(x, lval_pop(y, 0));
+
+  lval_del(y);
 
   return x;
 }
