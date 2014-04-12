@@ -11,15 +11,15 @@
 
 #define LASSERT_MAX_ARGS(name, args, max) \
   LASSERT(args, args->count == max,       \
-    "Function '" name "' given too many arguments.")
+    "Builtin '" name "' given too many arguments.")
 
 #define LASSERT_NONEMPTY_LIST(name, args, argn) \
   LASSERT(args, args->cell[argn]->count != 0,   \
-    "Function '" name "' given empty list.")
+    "Builtin '" name "' given empty list.")
 
 #define LASSERT_ARG_TYPE(name, args, argn, _type) \
   LASSERT(args, args->cell[argn]->type == _type,  \
-    "Function '" name "' given incorrect type.")
+    "Builtin '" name "' given incorrect type.")
 
 lval_t* builtin(lval_t* a, char*);
 
@@ -29,5 +29,6 @@ lval_t* builtin_tail(lval_t*);
 lval_t* builtin_eval(lval_t*);
 lval_t* builtin_list(lval_t*);
 lval_t* builtin_join(lval_t*);
+lval_t* builtin_len (lval_t*);
 
 #endif

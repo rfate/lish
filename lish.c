@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
 			number : /-?[0-9]+(\\.[0-9]+)?/                   ;\
 			symbol : '+' | '-' | '*' | '/' | '%' | '^'         \
 			       | \"list\" | \"head\" | \"tail\" | \"join\" \
-			       | \"eval\"                                 ;\
+			       | \"eval\" | \"len\"                       ;\
 			sexpr  : '(' <expr>* ')'                          ;\
 			qexpr  : '{' <expr>* '}'                          ;\
 			expr   : <number> | <symbol> | <sexpr> | <qexpr>  ;\

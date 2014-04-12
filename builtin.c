@@ -6,6 +6,7 @@ lval_t* builtin(lval_t* a, char* func) {
   if (strcmp("join",  func) == 0) return builtin_join(a);
   if (strcmp("head",  func) == 0) return builtin_head(a);
   if (strcmp("tail",  func) == 0) return builtin_tail(a);
+  if (strcmp("len",   func) == 0) return builtin_len(a);
   if (strstr("+-*/%", func))      return builtin_op(a, func);
 
   lval_del(a);
@@ -113,5 +114,14 @@ lval_t* builtin_join(lval_t* a) {
     x = lval_join(x, lval_pop(a, 0));
 
   lval_del(a);
+  return x;
+}
+
+lval_t* builtin_len(lval_t* a) {
+  LASSERT_ARG_TYPE("len", a, 0, LVAL_QEXPR);
+
+  lval_t* x = lval_num(a->cell[0]->count);
+  lval_del(a);
+
   return x;
 }
