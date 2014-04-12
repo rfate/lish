@@ -65,9 +65,9 @@ lval_t* builtin_op(lval_t* a, char* op) {
 }
 
 lval_t* builtin_head(lval_t* a) {
-  LASSERT(a, (a->count == 1), "Function 'head' passed too many arguments.");
-  LASSERT(a, (a->cell[0]->type == LVAL_QEXPR), "Function 'head' passed incorrect type.");
-  LASSERT(a, (a->cell[0]->count != 0), "Function 'head' passed {}.");
+  LASSERT_MAX_ARGS("head", a, 1);
+  LASSERT_ARG_TYPE("head", a, 0, LVAL_QEXPR);
+  LASSERT_NONEMPTY_LIST("head", a, 0);
 
   lval_t* v = lval_take(a, 0);
   while (v->count > 1)
@@ -77,9 +77,9 @@ lval_t* builtin_head(lval_t* a) {
 }
 
 lval_t* builtin_tail(lval_t* a) {
-  LASSERT(a, (a->count == 1), "Function 'tail' passed too many arguments.");
-  LASSERT(a, (a->cell[0]->type == LVAL_QEXPR), "Function 'tail' passed incorrect type.");
-  LASSERT(a, (a->cell[0]->count != 0), "Function 'tail' passed {}.");
+  LASSERT_MAX_ARGS("tail", a, 1);
+  LASSERT_ARG_TYPE("tail", a, 0, LVAL_QEXPR);
+  LASSERT_NONEMPTY_LIST("tail", a, 0);
 
   lval_t* v = lval_take(a, 0);
   lval_del(lval_pop(v, 0));
@@ -94,8 +94,8 @@ lval_t* builtin_list(lval_t* a) {
 }
 
 lval_t* builtin_eval(lval_t* a) {
-  LASSERT(a, (a->count == 1), "Function 'eval' passed too many arguments.");
-  LASSERT(a, (a->cell[0]->type == LVAL_QEXPR), "Function 'eval' passed incorrect type.");
+  LASSERT_MAX_ARGS("eval", a, 1);
+  LASSERT_ARG_TYPE("eval", a, 0, LVAL_QEXPR);
 
   lval_t* x = lval_take(a, 0);
   x->type = LVAL_SEXPR;
@@ -104,7 +104,7 @@ lval_t* builtin_eval(lval_t* a) {
 
 lval_t* builtin_join(lval_t* a) {
   for (int i = 0; i < a->count; ++i) {
-    LASSERT(a, (a->cell[i]->type == LVAL_QEXPR), "Function 'join' passed incorrect type.");
+    LASSERT_ARG_TYPE("join", a, i, LVAL_QEXPR);
   }
 
   lval_t* x = lval_pop(a, 0);
