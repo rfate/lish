@@ -1,7 +1,10 @@
 #ifndef _LISH_BUILTIN_H
 #define _LISH_BUILTIN_H
 
-#include "lval.h"
+struct lval_t;
+struct lenv_t;
+typedef struct lval_t lval_t;
+typedef struct lenv_t lenv_t;
 
 #define LASSERT(args, cond, err) \
   if (!(cond)) {                 \
@@ -19,16 +22,23 @@
 
 #define LASSERT_ARG_TYPE(name, args, argn, _type) \
   LASSERT(args, args->cell[argn]->type == _type,  \
-    "Builtin '" name "' given incorrect type.")
+    "Builtin '" name "' given incorrect type.");
 
-lval_t* builtin(lval_t* a, char*);
+lval_t* builtin_op  (lenv_t*, lval_t*, char*);
 
-lval_t* builtin_op  (lval_t*, char*);
-lval_t* builtin_head(lval_t*);
-lval_t* builtin_tail(lval_t*);
-lval_t* builtin_eval(lval_t*);
-lval_t* builtin_list(lval_t*);
-lval_t* builtin_join(lval_t*);
-lval_t* builtin_len (lval_t*);
+lval_t* builtin_eval(lenv_t*, lval_t*);
+lval_t* builtin_head(lenv_t*, lval_t*);
+lval_t* builtin_tail(lenv_t*, lval_t*);
+lval_t* builtin_list(lenv_t*, lval_t*);
+lval_t* builtin_join(lenv_t*, lval_t*);
+lval_t* builtin_len(lenv_t*, lval_t*);
+
+lval_t* builtin_def(lenv_t*, lval_t*);
+
+lval_t* builtin_add(lenv_t*, lval_t*);
+lval_t* builtin_sub(lenv_t*, lval_t*);
+lval_t* builtin_mul(lenv_t*, lval_t*);
+lval_t* builtin_div(lenv_t*, lval_t*);
+lval_t* builtin_mod(lenv_t*, lval_t*);
 
 #endif

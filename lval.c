@@ -1,5 +1,6 @@
 #include <math.h>
 #include "lval.h"
+#include "lenv.h"
 #include "builtin.h"
 
 /// Constructors
@@ -29,6 +30,14 @@ lval_t* lval_sym(char* sym) {
   return v;
 }
 
+lval_t* lval_fun(lbuiltin func) {
+  lval_t* v = malloc(sizeof(lval_t));
+  v->type = LVAL_FUN;
+  v->fun  = func;
+
+  return v;
+}
+
 lval_t* lval_sexpr(void) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type  = LVAL_SEXPR;
@@ -50,7 +59,9 @@ lval_t* lval_qexpr(void) {
 
 void lval_del(lval_t* v) {
   switch (v->type) {
-    case LVAL_NUM: break;
+    case LVAL_NUM:
+    case LVAL_FUN:
+      break;
 
     case LVAL_ERR: free(v->err); break;
     case LVAL_SYM: free(v->sym); break;
@@ -132,6 +143,9 @@ void lval_print(lval_t* v) {
     case LVAL_SYM:
       printf("%s", v->sym);
       break;
+    case LVAL_FUN:
+      printf("<function>");
+      break;
     case LVAL_SEXPR:
       lval_expr_print(v, '(', ')');
       break;
@@ -146,10 +160,10 @@ void lval_println(lval_t* v) {
   putchar('\n');
 }
 
-lval_t* lval_eval_sexpr(lval_t* v) {
+lval_t* lval_eval_sexpr(lenv_t* e, lval_t* v) {
   for (int i = 0; i < v->count; ++i)
   {
-    v->cell[i] = lval_eval(v->cell[i]);
+    v->cell[i] = lval_eval(e, v->cell[i]);
   }
 
   for (int i = 0; i < v->count; ++i) {
@@ -164,25 +178,68 @@ lval_t* lval_eval_sexpr(lval_t* v) {
     return lval_take(v, 0);
 
 
-  // Ensure first lval is a symbol
+  // Ensure first lval is a function
   lval_t* f = lval_pop(v, 0);
-  if (f->type != LVAL_SYM) {
+  if (f->type != LVAL_FUN) {
     lval_del(f);
     lval_del(v);
 
-    return lval_err("sexp does not begin with symbol");
+    return lval_err("First element is not a function.");
   }
 
-  lval_t* result = builtin(v, f->sym);
+  lval_t* result = f->fun(e, v);
   lval_del(f);
   return result;
 }
 
-lval_t* lval_eval(lval_t* v) {
+lval_t* lval_eval(lenv_t* e, lval_t* v) {
+  if (v->type == LVAL_SYM) {
+    lval_t* x = lenv_get(e, v);
+    lval_del(v);
+
+    return x;
+  }
+
   if (v->type == LVAL_SEXPR)
-    return lval_eval_sexpr(v);
+    return lval_eval_sexpr(e, v);
 
   return v;
+}
+
+lval_t* lval_copy(lval_t* v) {
+  lval_t* x = malloc(sizeof(lval_t));
+  x->type = v->type;
+
+  switch (v->type) {
+    case LVAL_NUM:
+      x->num = v->num;
+      break;
+    case LVAL_FUN:
+      x->fun = v->fun;
+      break;
+
+    case LVAL_ERR:
+      x->err = malloc(strlen(v->err) + 1);
+      strcpy(x->err, v->err);
+      break;
+
+    case LVAL_SYM:
+      x->sym = malloc(strlen(v->sym) + 1);
+      strcpy(x->sym, v->sym);
+      break;
+
+    case LVAL_SEXPR:
+    case LVAL_QEXPR:
+      x->count = v->count;
+      x->cell = malloc(sizeof(lval_t*) * v->count);
+      for (int i = 0; i < v->count; ++i) {
+        x->cell[i] = lval_copy(v->cell[i]);
+      }
+
+      break;
+  }
+
+  return x;
 }
 
 lval_t* lval_pop(lval_t* v, int i) {

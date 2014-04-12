@@ -7,6 +7,7 @@
 #include "mpc.h"
 #include "lish.h"
 #include "lval.h"
+#include "lenv.h"
 
 int main(int argc, const char* argv[]) {
 	mpc_parser_t* Number = mpc_new("number");
@@ -19,9 +20,7 @@ int main(int argc, const char* argv[]) {
 	mpca_lang(MPC_LANG_DEFAULT,
 		"                                                    \
 			number : /-?[0-9]+(\\.[0-9]+)?/                   ;\
-			symbol : '+' | '-' | '*' | '/' | '%' | '^'         \
-			       | \"list\" | \"head\" | \"tail\" | \"join\" \
-			       | \"eval\" | \"len\"                       ;\
+			symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/         ;\
 			sexpr  : '(' <expr>* ')'                          ;\
 			qexpr  : '{' <expr>* '}'                          ;\
 			expr   : <number> | <symbol> | <sexpr> | <qexpr>  ;\
@@ -29,6 +28,9 @@ int main(int argc, const char* argv[]) {
 		",
 		Number, Symbol, Sexpr, Qexpr, Expr, Lish);
 
+
+	lenv_t* env = lenv_new();
+	lenv_add_builtins(env);
 
 	puts("Lish " LISH_VERSION);
 
@@ -39,9 +41,10 @@ int main(int argc, const char* argv[]) {
 
 		mpc_result_t r;
 		if (mpc_parse("<stdin>", input, Lish, &r)) {
-			lval_t* x = lval_eval(lval_read(r.output));
+			lval_t* x = lval_eval(env, lval_read(r.output));
 			lval_println(x);
 			lval_del(x);
+
 			mpc_ast_delete(r.output);
 		} else {
 			mpc_err_print(r.error);
@@ -51,6 +54,7 @@ int main(int argc, const char* argv[]) {
 		free(input);
 	}
 
+	lenv_del(env);
 	mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expr, Lish);
 
 	return 0;

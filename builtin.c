@@ -1,20 +1,8 @@
 #include "builtin.h"
+#include "lval.h"
+#include "lenv.h"
 
-lval_t* builtin(lval_t* a, char* func) {
-  if (strcmp("eval",  func) == 0) return builtin_eval(a);
-  if (strcmp("list",  func) == 0) return builtin_list(a);
-  if (strcmp("join",  func) == 0) return builtin_join(a);
-  if (strcmp("head",  func) == 0) return builtin_head(a);
-  if (strcmp("tail",  func) == 0) return builtin_tail(a);
-  if (strcmp("len",   func) == 0) return builtin_len(a);
-  if (strstr("+-*/%", func))      return builtin_op(a, func);
-
-  lval_del(a);
-
-  return lval_err("Unknown function.");
-}
-
-lval_t* builtin_op(lval_t* a, char* op) {
+lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   for (int i = 0; i < a->count; ++i)
   {
     if (a->cell[i]->type != LVAL_NUM) {
@@ -65,7 +53,13 @@ lval_t* builtin_op(lval_t* a, char* op) {
   return x;
 }
 
-lval_t* builtin_head(lval_t* a) {
+lval_t* builtin_add(lenv_t* e, lval_t* v) { return builtin_op(e, v, "+"); }
+lval_t* builtin_sub(lenv_t* e, lval_t* v) { return builtin_op(e, v, "-"); }
+lval_t* builtin_mul(lenv_t* e, lval_t* v) { return builtin_op(e, v, "*"); }
+lval_t* builtin_div(lenv_t* e, lval_t* v) { return builtin_op(e, v, "/"); }
+lval_t* builtin_mod(lenv_t* e, lval_t* v) { return builtin_op(e, v, "%"); }
+
+lval_t* builtin_head(lenv_t* e, lval_t* a) {
   LASSERT_MAX_ARGS("head", a, 1);
   LASSERT_ARG_TYPE("head", a, 0, LVAL_QEXPR);
   LASSERT_NONEMPTY_LIST("head", a, 0);
@@ -77,7 +71,7 @@ lval_t* builtin_head(lval_t* a) {
   return v;
 }
 
-lval_t* builtin_tail(lval_t* a) {
+lval_t* builtin_tail(lenv_t* e, lval_t* a) {
   LASSERT_MAX_ARGS("tail", a, 1);
   LASSERT_ARG_TYPE("tail", a, 0, LVAL_QEXPR);
   LASSERT_NONEMPTY_LIST("tail", a, 0);
@@ -88,22 +82,22 @@ lval_t* builtin_tail(lval_t* a) {
   return v;
 }
 
-lval_t* builtin_list(lval_t* a) {
+lval_t* builtin_list(lenv_t* e, lval_t* a) {
   a->type = LVAL_QEXPR;
 
   return a;
 }
 
-lval_t* builtin_eval(lval_t* a) {
+lval_t* builtin_eval(lenv_t* e, lval_t* a) {
   LASSERT_MAX_ARGS("eval", a, 1);
   LASSERT_ARG_TYPE("eval", a, 0, LVAL_QEXPR);
 
   lval_t* x = lval_take(a, 0);
   x->type = LVAL_SEXPR;
-  return lval_eval(x);
+  return lval_eval(e, x);
 }
 
-lval_t* builtin_join(lval_t* a) {
+lval_t* builtin_join(lenv_t* e, lval_t* a) {
   for (int i = 0; i < a->count; ++i) {
     LASSERT_ARG_TYPE("join", a, i, LVAL_QEXPR);
   }
@@ -117,11 +111,31 @@ lval_t* builtin_join(lval_t* a) {
   return x;
 }
 
-lval_t* builtin_len(lval_t* a) {
+lval_t* builtin_len(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("len", a, 0, LVAL_QEXPR);
 
   lval_t* x = lval_num(a->cell[0]->count);
   lval_del(a);
 
   return x;
+}
+
+lval_t* builtin_def(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_TYPE("def", a, 0, LVAL_QEXPR);
+
+  lval_t* syms = a->cell[0];
+
+  for (int i = 0; i < syms->count; ++i) {
+    LASSERT(a, (syms->cell[i]->type == LVAL_SYM), "Builtin 'def' cannot define non-symbol.");
+  }
+
+  LASSERT(a, (syms->count == a->count-1), "Builtin 'def' cannot define incorrect number of values to symbols.");
+
+  for (int i = 0; i < syms->count; ++i) {
+    lenv_set(e, syms->cell[i], a->cell[i+1]);
+  }
+
+  lval_del(a);
+
+  return lval_sexpr();
 }
