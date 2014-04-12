@@ -8,6 +8,7 @@ enum {
   LVAL_NUM,
   LVAL_SYM,
   LVAL_SEXPR,
+  LVAL_QEXPR,
 };
 
 typedef struct lval_t {
@@ -25,6 +26,7 @@ lval_t* lval_num(double);
 lval_t* lval_err(char*);
 lval_t* lval_sym(char*);
 lval_t* lval_sexpr(void);
+lval_t* lval_qexpr(void);
 
 void    lval_del(lval_t*);
 lval_t* lval_add(lval_t*, lval_t*);
@@ -36,7 +38,6 @@ void lval_expr_print(lval_t*, char, char);
 void lval_print(lval_t*);
 void lval_println(lval_t*);
 
-lval_t* builtin_op(lval_t*, char*);
 lval_t* lval_pop(lval_t*, int);
 lval_t* lval_take(lval_t*, int);
 

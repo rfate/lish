@@ -12,18 +12,22 @@ int main(int argc, const char* argv[]) {
 	mpc_parser_t* Number = mpc_new("number");
 	mpc_parser_t* Symbol = mpc_new("symbol");
 	mpc_parser_t* Sexpr  = mpc_new("sexpr");
+	mpc_parser_t* Qexpr  = mpc_new("qexpr");
 	mpc_parser_t* Expr   = mpc_new("expr");
 	mpc_parser_t* Lish   = mpc_new("lish");
 
 	mpca_lang(MPC_LANG_DEFAULT,
-		"                                                  \
-			number : /-?[0-9]+(\\.[0-9]+)?/                 ;\
-			symbol : '+' | '-' | '*' | '/' | '%' | '^'      ;\
-			sexpr  : '(' <expr>* ')'                        ;\
-			expr   : <number> | <symbol> | <sexpr>          ;\
-			lish   : /^/ <expr>* /$/                        ;\
+		"                                                    \
+			number : /-?[0-9]+(\\.[0-9]+)?/                   ;\
+			symbol : '+' | '-' | '*' | '/' | '%' | '^'         \
+			       | \"list\" | \"head\" | \"tail\" | \"join\" \
+			       | \"eval\"                                 ;\
+			sexpr  : '(' <expr>* ')'                          ;\
+			qexpr  : '{' <expr>* '}'                          ;\
+			expr   : <number> | <symbol> | <sexpr> | <qexpr>  ;\
+			lish   : /^/ <expr>* /$/                          ;\
 		",
-		Number, Symbol, Sexpr, Expr, Lish);
+		Number, Symbol, Sexpr, Qexpr, Expr, Lish);
 
 
 	puts("Lish " LISH_VERSION);
@@ -47,7 +51,7 @@ int main(int argc, const char* argv[]) {
 		free(input);
 	}
 
-	mpc_cleanup(5, Number, Symbol, Sexpr, Expr, Lish);
+	mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expr, Lish);
 
 	return 0;
 }
