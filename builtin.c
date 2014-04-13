@@ -60,7 +60,7 @@ lval_t* builtin_div(lenv_t* e, lval_t* v) { return builtin_op(e, v, "/"); }
 lval_t* builtin_mod(lenv_t* e, lval_t* v) { return builtin_op(e, v, "%"); }
 
 lval_t* builtin_head(lenv_t* e, lval_t* a) {
-  LASSERT_MAX_ARGS("head", a, 1);
+  LASSERT_ARG_COUNT("head", a, 1);
   LASSERT_ARG_TYPE("head", a, 0, LVAL_QEXPR);
   LASSERT_NONEMPTY_LIST("head", a, 0);
 
@@ -72,7 +72,7 @@ lval_t* builtin_head(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_tail(lenv_t* e, lval_t* a) {
-  LASSERT_MAX_ARGS("tail", a, 1);
+  LASSERT_ARG_COUNT("tail", a, 1);
   LASSERT_ARG_TYPE("tail", a, 0, LVAL_QEXPR);
   LASSERT_NONEMPTY_LIST("tail", a, 0);
 
@@ -89,7 +89,7 @@ lval_t* builtin_list(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_eval(lenv_t* e, lval_t* a) {
-  LASSERT_MAX_ARGS("eval", a, 1);
+  LASSERT_ARG_COUNT("eval", a, 1);
   LASSERT_ARG_TYPE("eval", a, 0, LVAL_QEXPR);
 
   lval_t* x = lval_take(a, 0);
@@ -120,19 +120,22 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
   return x;
 }
 
-lval_t* builtin_def(lenv_t* e, lval_t* a) {
-  LASSERT_ARG_TYPE("def", a, 0, LVAL_QEXPR);
+lval_t* builtin_var(lenv_t* e, lval_t* a, char* func) {
+  LASSERT_ARG_TYPE(func, a, 0, LVAL_QEXPR);
 
   lval_t* syms = a->cell[0];
 
   for (int i = 0; i < syms->count; ++i) {
-    LASSERT(a, (syms->cell[i]->type == LVAL_SYM), "Builtin 'def' cannot define non-symbol.");
+    LASSERT(a, (syms->cell[i]->type == LVAL_SYM), "Builtin 'var?' cannot define non-symbol.");
   }
 
-  LASSERT(a, (syms->count == a->count-1), "Builtin 'def' cannot define incorrect number of values to symbols.");
+  LASSERT(a, (syms->count == a->count-1), "Builtin 'var' cannot define incorrect number of values to symbols.");
 
   for (int i = 0; i < syms->count; ++i) {
-    lenv_set(e, syms->cell[i], a->cell[i+1]);
+    if (strcmp(func, "def") == 0)
+      lenv_set(e, syms->cell[i], a->cell[i+1]);
+    if (strcmp(func, "=") == 0)
+      lenv_def(e, syms->cell[i], a->cell[i+1]);
   }
 
   lval_del(a);
@@ -145,4 +148,21 @@ lval_t* builtin_puts(lenv_t* e, lval_t* v) {
   lval_del(v);
 
   return lval_sexpr();
+}
+
+lval_t* builtin_lambda(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("lambda", a, 2);
+  LASSERT_ARG_TYPE("lambda", a, 0, LVAL_QEXPR);
+  LASSERT_ARG_TYPE("lambda", a, 1, LVAL_QEXPR);
+
+  for (int i = 0 ; i < a->cell[0]->count; ++i) {
+    LASSERT(a, (a->cell[0]->cell[i]->type == LVAL_SYM),
+      "Cannot define non-symbol. Expected %s, got %s.");
+  }
+
+  lval_t* formals = lval_pop(a, 0);
+  lval_t* body    = lval_pop(a, 0);
+  lval_del(a);
+
+  return lval_lambda(formals, body);
 }

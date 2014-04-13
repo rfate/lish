@@ -24,7 +24,11 @@ struct lval_t {
   double   num;
   char*    err;
   char*    sym;
-  lbuiltin fun;
+
+  lbuiltin builtin;
+  lenv_t*  env;
+  lval_t*  formals;
+  lval_t*  body;
 
   int             count;
   struct lval_t** cell;
@@ -36,6 +40,7 @@ lval_t* lval_sym(char*);
 lval_t* lval_fun(lbuiltin);
 lval_t* lval_sexpr(void);
 lval_t* lval_qexpr(void);
+lval_t* lval_lambda(lval_t*, lval_t*);
 
 void    lval_del(lval_t*);
 lval_t* lval_copy(lval_t*);

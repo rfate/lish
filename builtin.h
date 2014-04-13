@@ -12,9 +12,9 @@ typedef struct lenv_t lenv_t;
     return lval_err(fmt, ##__VA_ARGS__);             \
   }
 
-#define LASSERT_MAX_ARGS(name, args, max) \
-  LASSERT(args, args->count == max,       \
-    "Builtin '" name "' given too many arguments.")
+#define LASSERT_ARG_COUNT(name, args, c) \
+  LASSERT(args, args->count == c,       \
+    "Builtin '" name "' given incorrect number of arguments.")
 
 #define LASSERT_NONEMPTY_LIST(name, args, argn) \
   LASSERT(args, args->cell[argn]->count != 0,   \
@@ -34,6 +34,7 @@ lval_t* builtin_join(lenv_t*, lval_t*);
 lval_t* builtin_len(lenv_t*, lval_t*);
 
 lval_t* builtin_def(lenv_t*, lval_t*);
+lval_t* builtin_lambda(lenv_t*, lval_t*);
 
 lval_t* builtin_add(lenv_t*, lval_t*);
 lval_t* builtin_sub(lenv_t*, lval_t*);

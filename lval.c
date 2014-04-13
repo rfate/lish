@@ -41,8 +41,8 @@ lval_t* lval_sym(char* sym) {
 
 lval_t* lval_fun(lbuiltin func) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_FUN;
-  v->fun  = func;
+  v->type    = LVAL_FUN;
+  v->builtin = func;
 
   return v;
 }
@@ -64,14 +64,30 @@ lval_t* lval_qexpr(void) {
 
   return v;
 }
-/// 
+
+lval_t* lval_lambda(lval_t* formals, lval_t* body) {
+  lval_t* v = malloc(sizeof(lval_t));
+  v->type    = LVAL_FUN;
+  v->builtin = NULL;
+  v->env     = lenv_new();
+  v->formals = formals;
+  v->body    = body;
+
+  return v;
+}
+///
 
 void lval_del(lval_t* v) {
   switch (v->type) {
     case LVAL_NUM:
-    case LVAL_FUN:
       break;
 
+    case LVAL_FUN:
+      if (!v->builtin) {
+        lenv_del(v->env);
+        lval_del(v->formals);
+        lval_del(v->body);
+      }
     case LVAL_ERR: free(v->err); break;
     case LVAL_SYM: free(v->sym); break;
 
@@ -157,7 +173,15 @@ void lval_print_r(lval_t* v, bool root) {
       printf("%s", v->sym);
       break;
     case LVAL_FUN:
-      printf("<function>");
+      if (v->builtin) {
+        printf("<builtin>");
+      } else {
+        printf("(lambda ");
+        lval_print(v->formals);
+        putchar(' ');
+        lval_print(v->body);
+        putchar(')');
+      }
       break;
     case LVAL_SEXPR:
       if (root)
@@ -206,7 +230,7 @@ lval_t* lval_eval_sexpr(lenv_t* e, lval_t* v) {
     return lval_err("First element is not a function.");
   }
 
-  lval_t* result = f->fun(e, v);
+  lval_t* result = f->builtin(e, v);
   lval_del(f);
   return result;
 }
@@ -234,7 +258,14 @@ lval_t* lval_copy(lval_t* v) {
       x->num = v->num;
       break;
     case LVAL_FUN:
-      x->fun = v->fun;
+      if (v->builtin) {
+        x->builtin = v->builtin;
+      } else {
+        x->builtin = NULL;
+        x->env     = lenv_copy(v->env);
+        x->formals = lval_copy(v->formals);
+        x->body    = lval_copy(v->body);
+      }
       break;
 
     case LVAL_ERR:
