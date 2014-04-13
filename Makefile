@@ -4,4 +4,4 @@ all:
 	cc -std=c99 -Wall ${SOURCE} -ledit -lm -o lish.elf
 
 run: all
-	./lish.elf
+	./lish.elf repl

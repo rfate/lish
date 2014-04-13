@@ -31,7 +31,7 @@ struct lval_t {
 };
 
 lval_t* lval_num(double);
-lval_t* lval_err(char*);
+lval_t* lval_err(char*, ...);
 lval_t* lval_sym(char*);
 lval_t* lval_fun(lbuiltin);
 lval_t* lval_sexpr(void);

@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdbool.h>
 #include "lval.h"
 #include "lenv.h"
 #include "builtin.h"
@@ -12,11 +13,19 @@ lval_t* lval_num(double x) {
   return v;
 }
 
-lval_t* lval_err(char* err) {
+lval_t* lval_err(char* fmt, ...) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_ERR;
-  v->err  = malloc(strlen(err) + 1);
-  strcpy(v->err, err);
+
+  va_list va;
+  va_start(va, fmt);
+
+  v->err = malloc(512);
+  vsnprintf(v->err, 511, fmt, va);
+
+  v->err = realloc(v->err, strlen(v->err) + 1);
+
+  va_end(va);
 
   return v;
 }
@@ -117,9 +126,7 @@ lval_t* lval_read(mpc_ast_t* t) {
   return x;
 }
 
-void lval_expr_print(lval_t* v, char open, char close) {
-  putchar(open);
-
+void lval_expr_print_r(lval_t* v) {
   for (int i = 0; i < v->count; ++i) {
     lval_print(v->cell[i]);
 
@@ -128,11 +135,17 @@ void lval_expr_print(lval_t* v, char open, char close) {
       putchar(' ');
     }
   }
+}
+
+void lval_expr_print(lval_t* v, char open, char close) {
+  putchar(open);
+
+  lval_expr_print_r(v);
 
   putchar(close);
 }
 
-void lval_print(lval_t* v) {
+void lval_print_r(lval_t* v, bool root) {
   switch (v->type) {
     case LVAL_NUM:
       printf("%lf", v->num);
@@ -147,7 +160,10 @@ void lval_print(lval_t* v) {
       printf("<function>");
       break;
     case LVAL_SEXPR:
-      lval_expr_print(v, '(', ')');
+      if (root)
+        lval_expr_print_r(v);
+      else
+        lval_expr_print(v, '(', ')');
       break;
     case LVAL_QEXPR:
       lval_expr_print(v, '{', '}');
@@ -155,8 +171,12 @@ void lval_print(lval_t* v) {
   }
 }
 
+void lval_print(lval_t* v) {
+  lval_print_r(v, false);
+}
+
 void lval_println(lval_t* v) {
-  lval_print(v);
+  lval_print_r(v, true);
   putchar('\n');
 }
 
@@ -176,7 +196,6 @@ lval_t* lval_eval_sexpr(lenv_t* e, lval_t* v) {
 
   if (v->count == 1)
     return lval_take(v, 0);
-
 
   // Ensure first lval is a function
   lval_t* f = lval_pop(v, 0);

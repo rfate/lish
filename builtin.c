@@ -139,3 +139,10 @@ lval_t* builtin_def(lenv_t* e, lval_t* a) {
 
   return lval_sexpr();
 }
+
+lval_t* builtin_puts(lenv_t* e, lval_t* v) {
+  lval_println(v);
+  lval_del(v);
+
+  return lval_sexpr();
+}

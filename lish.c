@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -32,17 +33,25 @@ int main(int argc, const char* argv[]) {
 	lenv_t* env = lenv_new();
 	lenv_add_builtins(env);
 
-	puts("Lish " LISH_VERSION);
+	if (argc > 1)
+		puts("Lish " LISH_VERSION);
 
 	while (1) {
-		char* input = readline("lish> ");
-
-		add_history(input);
-
+		bool s;
 		mpc_result_t r;
-		if (mpc_parse("<stdin>", input, Lish, &r)) {
+		char* input;
+
+		if (argc > 1) {
+			input = readline("lish> ");
+			add_history(input);
+			s = mpc_parse("<stdin>", input, Lish, &r);
+		} else {
+			s = mpc_parse_contents("test.lish", Lish, &r);
+		}
+
+		if (s) {
 			lval_t* x = lval_eval(env, lval_read(r.output));
-			lval_println(x);
+			// lval_println(x);
 			lval_del(x);
 
 			mpc_ast_delete(r.output);
@@ -51,7 +60,10 @@ int main(int argc, const char* argv[]) {
 			mpc_err_delete(r.error);
 		}
 
-		free(input);
+		if (argc > 1)
+			free(input);
+		else
+			break;
 	}
 
 	lenv_del(env);
