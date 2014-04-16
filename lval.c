@@ -4,12 +4,34 @@
 #include "lenv.h"
 #include "builtin.h"
 
+char* ltype_name(int t) {
+  switch(t) {
+    case LVAL_ERR:   return "Error";
+    case LVAL_NUM:   return "Number";
+    case LVAL_STR:   return "String";
+    case LVAL_SYM:   return "Symbol";
+    case LVAL_FUN:   return "Function";
+    case LVAL_SEXPR: return "S-Expression";
+    case LVAL_QEXPR: return "Q-Expression";
+    default:         return "Unknown";
+  }
+}
+
 /// Constructors
 lval_t* lval_num(double x) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_NUM;
   v->num  = x;
 
+  return v;
+}
+
+lval_t* lval_str(char* str) {
+  lval_t* v = malloc(sizeof(lval_t));
+  v->type = LVAL_STR;
+  v->str  = malloc(strlen(str) + 1);
+  strcpy(v->str, str);
+  
   return v;
 }
 
@@ -88,6 +110,9 @@ void lval_del(lval_t* v) {
         lval_del(v->formals);
         lval_del(v->body);
       }
+      break;
+
+    case LVAL_STR: free(v->str); break;
     case LVAL_ERR: free(v->err); break;
     case LVAL_SYM: free(v->sym); break;
 
@@ -112,6 +137,39 @@ lval_t* lval_add(lval_t* v, lval_t* x) {
   return v;
 }
 
+lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
+  if (f->builtin) return f->builtin(e, a);
+
+  int given = a->count;
+  int total = f->formals->count;
+
+  while (a->count) {
+    if (f->formals->count == 0) {
+      lval_del(a);
+      lval_err("Function passed too many arguments. Expected %d, got %d.",
+        total, given);
+    }
+
+    lval_t* sym = lval_pop(f->formals, 0);
+    lval_t* val = lval_pop(a, 0);
+
+    lenv_set(f->env, sym, val);
+
+    lval_del(sym);
+    lval_del(val);
+  }
+
+  lval_del(a);
+
+  if (f->formals->count == 0) {
+    f->env->parent = e;
+
+    return builtin_eval(f->env, lval_add(lval_sexpr(), lval_copy(f->body)));
+  }
+    
+  return lval_copy(f);
+}
+
 lval_t* lval_read_num(mpc_ast_t* t) {
   errno = 0;
   double x = strtod(t->contents, NULL);
@@ -119,12 +177,30 @@ lval_t* lval_read_num(mpc_ast_t* t) {
   return errno != ERANGE ? lval_num(x) : lval_err("invalid number");
 }
 
+lval_t* lval_read_str(mpc_ast_t* t) {
+  // trim ending quote
+  t->contents[strlen(t->contents) - 1] = '\0';
+
+  char* unescaped = malloc(strlen(t->contents + 1) + 1);
+  strcpy(unescaped, t->contents + 1);
+
+  unescaped = mpcf_escape(unescaped);
+
+  lval_t* str = lval_str(unescaped);
+  free(unescaped);
+
+  return str;
+}
+
 lval_t* lval_read(mpc_ast_t* t) {
   if (strstr(t->tag, "number"))
     return lval_read_num(t);
   if (strstr(t->tag, "symbol"))
     return lval_sym(t->contents);
-  
+
+  if (strstr(t->tag, "string"))
+    return lval_read_str(t);  
+
   lval_t* x = NULL;
   if (strcmp(t->tag, ">") == 0) { x = lval_sexpr(); }
   if (strstr(t->tag, "sexpr"))  { x = lval_sexpr(); }
@@ -161,10 +237,24 @@ void lval_expr_print(lval_t* v, char open, char close) {
   putchar(close);
 }
 
+void lval_str_print(lval_t* v) {
+  char* escaped = malloc(strlen(v->str) + 1);
+  strcpy(escaped, v->str);
+
+  escaped = mpcf_escape(escaped);
+
+  printf("\"%s\"", escaped);
+
+  free(escaped);
+}
+
 void lval_print_r(lval_t* v, bool root) {
   switch (v->type) {
     case LVAL_NUM:
       printf("%lf", v->num);
+      break;
+    case LVAL_STR:
+      lval_str_print(v);
       break;
     case LVAL_ERR:
       printf("Error: %s", v->err);
@@ -224,14 +314,16 @@ lval_t* lval_eval_sexpr(lenv_t* e, lval_t* v) {
   // Ensure first lval is a function
   lval_t* f = lval_pop(v, 0);
   if (f->type != LVAL_FUN) {
+    lval_t* err = lval_err("S-Expression starts with incorrect type. Expected %s, got %s.",
+      ltype_name(f->type), ltype_name(LVAL_FUN));
+
     lval_del(f);
     lval_del(v);
 
-    return lval_err("First element is not a function.");
+    return err;
   }
 
-  lval_t* result = f->builtin(e, v);
-  lval_del(f);
+  lval_t* result = lval_call(e, f, v);
   return result;
 }
 
@@ -266,6 +358,11 @@ lval_t* lval_copy(lval_t* v) {
         x->formals = lval_copy(v->formals);
         x->body    = lval_copy(v->body);
       }
+      break;
+
+    case LVAL_STR:
+      x->str = malloc(strlen(v->str) + 1);
+      strcpy(x->str, v->str);
       break;
 
     case LVAL_ERR:

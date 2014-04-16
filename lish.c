@@ -9,49 +9,53 @@
 #include "lish.h"
 #include "lval.h"
 #include "lenv.h"
+#include "parser.h"
 
 int main(int argc, const char* argv[]) {
-	mpc_parser_t* Number = mpc_new("number");
-	mpc_parser_t* Symbol = mpc_new("symbol");
-	mpc_parser_t* Sexpr  = mpc_new("sexpr");
-	mpc_parser_t* Qexpr  = mpc_new("qexpr");
-	mpc_parser_t* Expr   = mpc_new("expr");
-	mpc_parser_t* Lish   = mpc_new("lish");
+  Comment = mpc_new("comment");
+	Number  = mpc_new("number");
+  String  = mpc_new("string");
+	Symbol  = mpc_new("symbol");
+	Sexpr   = mpc_new("sexpr");
+	Qexpr   = mpc_new("qexpr");
+	Expr    = mpc_new("expr");
+	Lish    = mpc_new("lish");
 
 	mpca_lang(MPC_LANG_DEFAULT,
-		"                                                    \
-			number : /-?[0-9]+(\\.[0-9]+)?/                   ;\
-			symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/         ;\
-			sexpr  : '(' <expr>* ')'                          ;\
-			qexpr  : '{' <expr>* '}'                          ;\
-			expr   : <number> | <symbol> | <sexpr> | <qexpr>  ;\
-			lish   : /^/ <expr>* /$/                          ;\
+		"                                                     \
+      comment : /;[^\\r\\n]*/                            ;\
+			number  : /-?[0-9]+(\\.[0-9]+)?/                   ;\
+      string  : /\"(\\\\.|[^\"])*\"/                     ;\
+			symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ]+/       ;\
+			sexpr   : '(' <expr>* ')'                          ;\
+			qexpr   : '{' <expr>* '}'                          ;\
+			expr    : <number> | <string> | <symbol>            \
+              | <sexpr> | <qexpr> | <comment>            ;\
+			lish    : /^/ <expr>* /$/                          ;\
 		",
-		Number, Symbol, Sexpr, Qexpr, Expr, Lish);
+		Comment, Number, String, Symbol, Sexpr, Qexpr, Expr, Lish);
 
 
 	lenv_t* env = lenv_new();
 	lenv_add_builtins(env);
 
-	if (argc > 1)
+  bool repl = (argc > 1);
+
+	if (!repl) {
+
+  } else {
 		puts("Lish " LISH_VERSION);
+  }
 
-	while (1) {
-		bool s;
+	while (repl) {
 		mpc_result_t r;
-		char* input;
 
-		if (argc > 1) {
-			input = readline("lish> ");
-			add_history(input);
-			s = mpc_parse("<stdin>", input, Lish, &r);
-		} else {
-			s = mpc_parse_contents("test.lish", Lish, &r);
-		}
+		char* input = readline("lish> ");
+		add_history(input);
 
-		if (s) {
+		if (mpc_parse("<stdin>", input, Lish, &r)) {
 			lval_t* x = lval_eval(env, lval_read(r.output));
-			// lval_println(x);
+        		lval_println(x);
 			lval_del(x);
 
 			mpc_ast_delete(r.output);
@@ -60,14 +64,14 @@ int main(int argc, const char* argv[]) {
 			mpc_err_delete(r.error);
 		}
 
-		if (argc > 1)
+		if (repl)
 			free(input);
 		else
 			break;
 	}
 
 	lenv_del(env);
-	mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expr, Lish);
+	mpc_cleanup(8, Comment, Number, String, Symbol, Sexpr, Qexpr, Expr, Lish);
 
 	return 0;
 }

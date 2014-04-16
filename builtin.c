@@ -1,6 +1,7 @@
 #include "builtin.h"
 #include "lval.h"
 #include "lenv.h"
+#include "parser.h"
 
 lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   for (int i = 0; i < a->count; ++i)
@@ -15,6 +16,9 @@ lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   // If sub with no args, perform negation.
   if (strcmp(op, "-") == 0 && a->count == 0)
     x->num = -x->num;
+
+  if (strcmp(op, "+") == 0 && a->count == 0)
+    x->num = (x->num < 0) ? -x->num : x->num;
 
   while (a->count > 0) {
     lval_t* y = lval_pop(a, 0);
@@ -58,6 +62,41 @@ lval_t* builtin_sub(lenv_t* e, lval_t* v) { return builtin_op(e, v, "-"); }
 lval_t* builtin_mul(lenv_t* e, lval_t* v) { return builtin_op(e, v, "*"); }
 lval_t* builtin_div(lenv_t* e, lval_t* v) { return builtin_op(e, v, "/"); }
 lval_t* builtin_mod(lenv_t* e, lval_t* v) { return builtin_op(e, v, "%"); }
+
+lval_t* builtin_load(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("load", a, 1);
+  LASSERT_ARG_TYPE("load", a, 0, LVAL_STR);
+
+  mpc_result_t r;
+
+  if (mpc_parse_contents(a->cell[0]->str, Lish, &r)) {
+    lval_t* expr = lval_read(r.output);
+    mpc_ast_delete(r.output);
+
+    while (expr->count) {
+      lval_t* x = lval_eval(e, lval_pop(expr, 0));
+
+      if (x->type == LVAL_ERR)
+        lval_println(x);
+
+      lval_del(x);
+    }
+
+    lval_del(expr);
+    lval_del(a);
+
+    return lval_sexpr();
+  }
+
+  char* err_msg = mpc_err_string(r.error);
+  mpc_err_delete(r.error);
+  
+  lval_t* err = lval_err("Could not load file '%s'.", err_msg);
+  free(err_msg);
+  lval_del(a);
+
+  return err;
+}
 
 lval_t* builtin_head(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("head", a, 1);
@@ -121,15 +160,16 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_var(lenv_t* e, lval_t* a, char* func) {
-  LASSERT_ARG_TYPE(func, a, 0, LVAL_QEXPR);
+  LASSERT_ARG_TYPE("var??", a, 0, LVAL_QEXPR);
 
   lval_t* syms = a->cell[0];
 
   for (int i = 0; i < syms->count; ++i) {
-    LASSERT(a, (syms->cell[i]->type == LVAL_SYM), "Builtin 'var?' cannot define non-symbol.");
+    LASSERT(a, (syms->cell[i]->type == LVAL_SYM), "Builtin '%s' cannot define non-symbol.", func);
   }
 
-  LASSERT(a, (syms->count == a->count-1), "Builtin 'var' cannot define incorrect number of values to symbols.");
+  LASSERT(a, (syms->count == a->count-1), "Builtin '%s' cannot assign incorrect number of values to symbols. Expected %d, got %d.",
+    func, syms->count, a->count-1);
 
   for (int i = 0; i < syms->count; ++i) {
     if (strcmp(func, "def") == 0)
@@ -143,8 +183,17 @@ lval_t* builtin_var(lenv_t* e, lval_t* a, char* func) {
   return lval_sexpr();
 }
 
+lval_t* builtin_def(lenv_t* e, lval_t* v) { return builtin_var(e, v, "def"); }
+lval_t* builtin_set(lenv_t* e, lval_t* v) { return builtin_var(e, v, "=");   }
+
 lval_t* builtin_puts(lenv_t* e, lval_t* v) {
-  lval_println(v);
+  LASSERT_ARG_COUNT("puts", v, 1);
+
+  if (v->cell[0]->type == LVAL_STR) {
+    printf("%s", v->cell[0]->str);
+  } else {
+    lval_println(v);
+  }
   lval_del(v);
 
   return lval_sexpr();
@@ -166,3 +215,4 @@ lval_t* builtin_lambda(lenv_t* e, lval_t* a) {
 
   return lval_lambda(formals, body);
 }
+

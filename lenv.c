@@ -21,7 +21,7 @@ void lenv_del(lenv_t* e) {
   free(e);
 }
 
-lval_t* lenv_copy(lenv_t* e) {
+lenv_t* lenv_copy(lenv_t* e) {
   lenv_t* n = malloc(sizeof(lenv_t));
   n->parent = e->parent;
   n->count  = e->count;
@@ -90,6 +90,7 @@ void lenv_add_builtin(lenv_t* e, char* name, lbuiltin func) {
 }
 
 void lenv_add_builtins(lenv_t* e) {
+  // list
   lenv_add_builtin(e, "list", builtin_list);
   lenv_add_builtin(e, "head", builtin_head);
   lenv_add_builtin(e, "tail", builtin_tail);
@@ -97,15 +98,20 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "join", builtin_join);
   lenv_add_builtin(e, "len",  builtin_len);
 
-  lenv_add_builtin(e, "def", builtin_def);
-  lenv_add_builtin(e, "=", builtin_);
+  // vars
+  lenv_add_builtin(e, "def",    builtin_def);
+  lenv_add_builtin(e, "=",      builtin_set);
   lenv_add_builtin(e, "lambda", builtin_lambda);
+  lenv_add_builtin(e, "λ",      builtin_lambda);
 
+  // operators
   lenv_add_builtin(e, "+", builtin_add);
   lenv_add_builtin(e, "-", builtin_sub);
   lenv_add_builtin(e, "*", builtin_mul);
   lenv_add_builtin(e, "/", builtin_div);
   lenv_add_builtin(e, "%", builtin_mod);
 
+  // io
   lenv_add_builtin(e, "puts", builtin_puts);
+  lenv_add_builtin(e, "load", builtin_load);
 }
