@@ -1,0 +1,19 @@
+"function shorthand"
+(def {fun} (λ {f b} {
+  def (head f) (λ (tail f) b)
+}))
+
+(def {->} fun)
+
+(def {fact} (λ {n} {
+  if (<= n 1)
+    { 1 }
+    { * n (fact(- n 1)) }
+}))
+
+"this is wrong im dumb"
+(def {fib} (λ {n} {
+  if (< n 1)
+    { 0 }
+    { + n (fib(- n 1)) }
+}))

@@ -63,6 +63,48 @@ lval_t* builtin_mul(lenv_t* e, lval_t* v) { return builtin_op(e, v, "*"); }
 lval_t* builtin_div(lenv_t* e, lval_t* v) { return builtin_op(e, v, "/"); }
 lval_t* builtin_mod(lenv_t* e, lval_t* v) { return builtin_op(e, v, "%"); }
 
+lval_t* builtin_if(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("if", a, 3);
+  LASSERT_ARG_TYPE("if", a, 0, LVAL_NUM);
+  LASSERT_ARG_TYPE("if", a, 1, LVAL_QEXPR);
+  LASSERT_ARG_TYPE("if", a, 2, LVAL_QEXPR);
+
+  // Mark expressions as evaluable.
+  lval_t* x;
+  a->cell[1]->type = LVAL_SEXPR;
+  a->cell[2]->type = LVAL_SEXPR;
+
+  if (a->cell[0]->num) {
+    x = lval_eval(e, lval_pop(a, 1));
+  } else {
+    x = lval_eval(e, lval_pop(a, 2));
+  }
+
+  lval_del(a);
+  return x;
+}
+
+lval_t* builtin_ord(lenv_t* e, lval_t* a, char* op) {
+  LASSERT_ARG_COUNT("ord?", a, 2);
+  LASSERT_ARG_TYPE("ord?", a, 0, LVAL_NUM);
+  LASSERT_ARG_TYPE("ord?", a, 1, LVAL_NUM);
+
+  int r;
+  if (strcmp(op, ">")  == 0) { r = (a->cell[0]->num >  a->cell[1]->num); }
+  if (strcmp(op, "<")  == 0) { r = (a->cell[0]->num <  a->cell[1]->num); }
+  if (strcmp(op, ">=") == 0) { r = (a->cell[0]->num >= a->cell[1]->num); }
+  if (strcmp(op, "<=") == 0) { r = (a->cell[0]->num <= a->cell[1]->num); }
+
+  lval_del(a);
+
+  return lval_num(r);
+}
+
+lval_t* builtin_gt(lenv_t* e, lval_t* a) { return builtin_ord(e, a, ">");  }
+lval_t* builtin_lt(lenv_t* e, lval_t* a) { return builtin_ord(e, a, "<");  }
+lval_t* builtin_ge(lenv_t* e, lval_t* a) { return builtin_ord(e, a, ">="); }
+lval_t* builtin_le(lenv_t* e, lval_t* a) { return builtin_ord(e, a, "<="); }
+
 lval_t* builtin_load(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("load", a, 1);
   LASSERT_ARG_TYPE("load", a, 0, LVAL_STR);

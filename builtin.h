@@ -49,6 +49,15 @@ lval_t* builtin_mul(lenv_t*, lval_t*);
 lval_t* builtin_div(lenv_t*, lval_t*);
 lval_t* builtin_mod(lenv_t*, lval_t*);
 
+// conditionals
+lval_t* builtin_if(lenv_t*, lval_t*);
+lval_t* builtin_gt(lenv_t*, lval_t*);
+lval_t* builtin_lt(lenv_t*, lval_t*);
+lval_t* builtin_ge(lenv_t*, lval_t*);
+lval_t* builtin_le(lenv_t*, lval_t*);
+lval_t* builtin_eq(lenv_t*, lval_t*);
+lval_t* builtin_ne(lenv_t*, lval_t*);
+
 // io
 lval_t* builtin_load(lenv_t*, lval_t*);
 lval_t* builtin_puts(lenv_t*, lval_t*);

@@ -99,8 +99,8 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "len",  builtin_len);
 
   // vars
-  lenv_add_builtin(e, "def",    builtin_def);
-  lenv_add_builtin(e, "=",      builtin_set);
+  lenv_add_builtin(e, "def",    builtin_set);
+  lenv_add_builtin(e, "=",      builtin_def);
   lenv_add_builtin(e, "lambda", builtin_lambda);
   lenv_add_builtin(e, "λ",      builtin_lambda);
 
@@ -110,6 +110,13 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "*", builtin_mul);
   lenv_add_builtin(e, "/", builtin_div);
   lenv_add_builtin(e, "%", builtin_mod);
+
+  // conditionals
+  lenv_add_builtin(e, "if", builtin_if);
+  lenv_add_builtin(e, ">",  builtin_gt);
+  lenv_add_builtin(e, "<",  builtin_lt);
+  lenv_add_builtin(e, ">=", builtin_ge);
+  lenv_add_builtin(e, "<=", builtin_le);
 
   // io
   lenv_add_builtin(e, "puts", builtin_puts);
