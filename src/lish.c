@@ -18,19 +18,18 @@ lish_t* lish_new(void) {
   Lish    = mpc_new("lish");
 
   mpca_lang(MPC_LANG_DEFAULT,
-    "                                                     \
-      integer : /-?[0-9]+/                               ;\
-      float   : /-?[0-9]+\\.[0-9]+/                      ;\
-      string  : /\"(\\\\.|[^\"])*\"/                     ;\
-      symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.\\?]+/ ;\
-      boolean : \"true\" | \"false\"                     ;\
-      comment : /#[^\\r\\n]*/                            ;\
-      sexpr   : '(' <expr>* ')'                          ;\
-      qexpr   : '{' <expr>* '}'                          ;\
-      expr    : <float> | <integer> | <string>            \
-              | <boolean> | <sexpr> | <qexpr> | <comment> \
-              | <symbol>                                 ;\
-      lish    : /^/ <expr>* /$/                          ;\
+    "                                                       \
+      integer : /-?[0-9]+/                                 ;\
+      float   : /-?[0-9]+\\.[0-9]+/                        ;\
+      string  : /\"(\\\\.|[^\"])*\"/                       ;\
+      symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.\\?]+/   ;\
+      boolean : \"true\" | \"false\"                       ;\
+      comment : /#[^\\r\\n]*/                              ;\
+      sexpr   : '(' <expr>* ')'                            ;\
+      qexpr   : '{' <expr>* '}'                            ;\
+      expr    : <float> | <integer> | <string> | <boolean>  \
+              | <sexpr> | <qexpr>  | <comment> | <symbol>  ;\
+      lish    : /^/ <expr>* /$/                            ;\
     ",
     Integer, Float, String, Symbol, Boolean, Comment, Sexpr, Qexpr, Expr, Lish);
 
