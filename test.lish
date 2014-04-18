@@ -1,2 +1,2 @@
-#!/home/robert/code/lish/lish.elf
+#!/home/robert/code/lish/lish
 (puts (Math.fact 5))

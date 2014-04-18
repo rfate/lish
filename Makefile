@@ -1,10 +1,28 @@
-SOURCE=mpc.c builtin.c lenv.c lval.c lish.c interpreter.c
+SOURCES_R=mpc.c builtin.c lenv.c lval.c lish.c interpreter.c
+EXECUTABLE=lish
 
-all:
-	cc -std=c11 -Wall ${SOURCE} -ledit -lm -o lish.elf
+SOURCE_DIR=src
+OBJECT_DIR=bin
 
-run: all
-	./lish.elf
+CC=cc
+CFLAGS=-c -std=c99 -Wall
+LDFLAGS=-ledit -lm
 
-dbg: all
-	gdb -ex run ./lish.elf
+SOURCES=$(SOURCES_R:%=$(SOURCE_DIR)/%)
+OBJECTS=$(SOURCES:$(SOURCE_DIR)/%.c=$(OBJECT_DIR)/%.o)
+
+all: $(SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+
+$(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c
+	$(CC) $(CFLAGS) $< -o $@
+
+clean:
+	rm -f $(OBJECT_DIR)/*.o
+	rm -f $(EXECUTABLE)
+
+install:
+	cp $(EXECUTABLE) /usr/local/bin
+

@@ -12,6 +12,7 @@ typedef lval_t*(*lbuiltin)(lenv_t*, lval_t*);
 enum {
   LVAL_ERR,
   LVAL_NUM,
+  LVAL_BOOL,
   LVAL_STR,
   LVAL_SYM,
   LVAL_FUN,
@@ -39,6 +40,7 @@ struct lval_t {
 };
 
 lval_t* lval_num(double);
+lval_t* lval_bool(int);
 lval_t* lval_str(char*);
 lval_t* lval_err(char*, ...);
 lval_t* lval_sym(char*);
