@@ -1,0 +1,12 @@
+(def {Math.fact} (λ {n} {
+  if (<= n 1)
+    { 1 }
+    { * n (Math.fact(- n 1)) }
+}))
+
+# this is wrong im dumb
+(def {fib} (λ {n} {
+  if (< n 1)
+    { 0 }
+    { + n (fib(- n 1)) }
+}))

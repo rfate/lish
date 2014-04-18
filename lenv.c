@@ -102,7 +102,6 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "def",    builtin_set);
   lenv_add_builtin(e, "=",      builtin_def);
   lenv_add_builtin(e, "lambda", builtin_lambda);
-  lenv_add_builtin(e, "λ",      builtin_lambda);
 
   // operators
   lenv_add_builtin(e, "+", builtin_add);

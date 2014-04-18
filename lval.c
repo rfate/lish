@@ -207,11 +207,12 @@ lval_t* lval_read(mpc_ast_t* t) {
   if (strstr(t->tag, "qexpr"))  { x = lval_qexpr(); }
 
   for (int i = 0; i < t->children_num; ++i) {
-    if (strcmp(t->children[i]->contents, "(") == 0) { continue; }
-    if (strcmp(t->children[i]->contents, ")") == 0) { continue; }
-    if (strcmp(t->children[i]->contents, "{") == 0) { continue; }
-    if (strcmp(t->children[i]->contents, "}") == 0) { continue; }
-    if (strcmp(t->children[i]->tag,  "regex") == 0) { continue; }
+    if (strcmp(t->children[i]->contents, "(") == 0)  { continue; }
+    if (strcmp(t->children[i]->contents, ")") == 0)  { continue; }
+    if (strcmp(t->children[i]->contents, "{") == 0)  { continue; }
+    if (strcmp(t->children[i]->contents, "}") == 0)  { continue; }
+    if (strcmp(t->children[i]->tag,  "regex") == 0)  { continue; }
+    if (strstr(t->children[i]->tag, "comment"))      { continue; }
     x = lval_add(x, lval_read(t->children[i]));
   }
 

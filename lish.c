@@ -11,7 +11,7 @@
 #include "lenv.h"
 #include "parser.h"
 
-int main(int argc, const char* argv[]) {
+int main(int argc, char** argv) {
   Comment = mpc_new("comment");
 	Number  = mpc_new("number");
   String  = mpc_new("string");
@@ -23,26 +23,38 @@ int main(int argc, const char* argv[]) {
 
 	mpca_lang(MPC_LANG_DEFAULT,
 		"                                                     \
-      comment : /;[^\\r\\n]*/                            ;\
 			number  : /-?[0-9]+(\\.[0-9]+)?/                   ;\
       string  : /\"(\\\\.|[^\"])*\"/                     ;\
-			symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ]+/       ;\
+			symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.]+/    ;\
+      comment : /#[^\\r\\n]*/                            ;\
 			sexpr   : '(' <expr>* ')'                          ;\
 			qexpr   : '{' <expr>* '}'                          ;\
 			expr    : <number> | <string> | <symbol>            \
               | <sexpr> | <qexpr> | <comment>            ;\
 			lish    : /^/ <expr>* /$/                          ;\
 		",
-		Comment, Number, String, Symbol, Sexpr, Qexpr, Expr, Lish);
+		Number, String, Symbol, Comment, Sexpr, Qexpr, Expr, Lish);
 
 
 	lenv_t* env = lenv_new();
 	lenv_add_builtins(env);
 
-  bool repl = (argc > 1);
+  bool repl = (argc < 2);
+
+  // load stdlib
+  lval_t* libName = lval_add(lval_sexpr(), lval_str("lib/core.lish"));
+  lval_t* lib = builtin_load(env, libName);
+  if (lib->type == LVAL_ERR) { lval_println(lib); }
+  lval_del(lib);
 
 	if (!repl) {
+		for (int i = 1; i < argc; ++i) {
+			lval_t* args = lval_add(lval_sexpr(), lval_str(argv[i]));
 
+			lval_t* x = builtin_load(env, args);
+			if (x->type == LVAL_ERR) { lval_println(x); }
+			lval_del(x);
+		}
   } else {
 		puts("Lish " LISH_VERSION);
   }
@@ -64,10 +76,7 @@ int main(int argc, const char* argv[]) {
 			mpc_err_delete(r.error);
 		}
 
-		if (repl)
-			free(input);
-		else
-			break;
+		free(input);
 	}
 
 	lenv_del(env);
