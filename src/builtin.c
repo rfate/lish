@@ -272,7 +272,7 @@ lval_t* builtin_map(lenv_t* e, lval_t* a) {
   
   for (int i = 0; i < a->cell[0]->count; ++i) {
     lval_t* x = lval_sexpr();
-    x = lval_add(x, a->cell[1]);
+    x = lval_add(x, lval_copy(a->cell[1]));
     x = lval_add(x, a->cell[0]->cell[i]);
     v = lval_add(v, lval_eval(e, x));
   }
