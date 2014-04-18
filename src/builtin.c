@@ -125,6 +125,20 @@ lval_t* builtin_lt(lenv_t* e, lval_t* a) { return builtin_ord(e, a, "<");  }
 lval_t* builtin_ge(lenv_t* e, lval_t* a) { return builtin_ord(e, a, ">="); }
 lval_t* builtin_le(lenv_t* e, lval_t* a) { return builtin_ord(e, a, "<="); }
 
+lval_t* builtin_cmp(lenv_t* e, lval_t* a, char* op) {
+  LASSERT_ARG_COUNT("cmp???", a, 2);
+
+  int r;
+  if (strcmp(op, "==") == 0) { r =  lval_eq(a->cell[0], a->cell[1]); }
+  if (strcmp(op, "!=") == 0) { r = !lval_eq(a->cell[0], a->cell[1]); }
+
+  lval_del(a);
+  return lval_bool(r);
+}
+
+lval_t* builtin_eq(lenv_t* e, lval_t* a) { return builtin_cmp(e, a, "=="); }
+lval_t* builtin_ne(lenv_t* e, lval_t* a) { return builtin_cmp(e, a, "!="); }
+
 lval_t* builtin_load(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("load", a, 0, LVAL_STR);
 

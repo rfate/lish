@@ -165,6 +165,49 @@ lval_t* lval_truthy(lval_t* v) {
   return lval_bool(b);
 }
 
+int lval_eq(lval_t* x, lval_t* y) {
+  // No shit, right? This ain't javascript.
+  if (x->type != y->type)
+    return 0;
+
+  switch (x->type) {
+    case LVAL_NUM:
+    case LVAL_BOOL:
+      return (x->num == y->num);
+
+    case LVAL_STR:
+      return (strcmp(x->str, y->str) == 0);
+
+    case LVAL_ERR:
+      return (strcmp(x->err, y->err) == 0);
+
+    case LVAL_SYM:
+      return (strcmp(x->sym, y->sym) == 0);
+
+    case LVAL_FUN:
+      if (x->builtin || y->builtin) {
+        return (x->builtin == y->builtin);
+      } else {
+        return lval_eq(x->formals, y->formals) && lval_eq(x->body, y->body);
+      }
+
+    case LVAL_SEXPR:
+    case LVAL_QEXPR:
+      if (x->count != y->count)
+        return 0;
+      
+      for (int i = 0; i < x->count; ++i) {
+        if (!lval_eq(x->cell[i], y->cell[i]))
+          return 0;
+      }
+      return 1;
+      break;
+  }
+
+  printf("Warning! Comparison reached default case!\n");
+  return 0;
+}
+
 lval_t* lval_add(lval_t* v, lval_t* x) {
   v->count++;
   v->cell = realloc(v->cell, sizeof(lval_t*) * v->count);
