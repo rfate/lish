@@ -1,4 +1,4 @@
-SOURCES_R=mpc.c linenoise.c builtin.c lenv.c lval.c lish.c main.c
+SOURCES_R=mpc.c linenoise.c string.c builtin.c lenv.c lval.c lish.c main.c
 EXECUTABLE=lish
 
 SOURCE_DIR=src
