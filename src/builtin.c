@@ -6,7 +6,11 @@
 lval_t* builtin_type(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("type", a, 1);
 
-  return lval_str(ltype_name(a->cell[0]->type));
+  lval_t* x = lval_str(ltype_name(a->cell[0]->type));
+
+  lval_del(a);
+
+  return x;
 }
 
 // This fucking blows.
@@ -51,8 +55,10 @@ lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   newString[end - start] = '\0';
   
   lval_t* x = lval_str(newString);
+
   free(newString);
   lval_del(a);
+
   return x;
 }
 
@@ -314,6 +320,7 @@ lval_t* builtin_nth(lenv_t* e, lval_t* a) {
     lval_t* x = lval_pop(v, id);
 
     lval_del(v);
+    lval_del(a);
 
     return x;
   }
@@ -327,6 +334,7 @@ lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   str[1] = '\0';
   lval_t* x = lval_str(str);
   free(str);
+  lval_del(a);
 
   return x;
 }

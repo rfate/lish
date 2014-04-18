@@ -32,7 +32,6 @@ char* ltype_name(int);
     "Builtin \"" name "\" wasn't expecting type %s for arg %d.",               \
     ltype_name(args->cell[index]->type), index);
 
-lval_t* builtin_op(lenv_t*, lval_t*, char*);
 
 lval_t* builtin_type(lenv_t*, lval_t*);
 
