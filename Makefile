@@ -1,4 +1,4 @@
-SOURCES_R=mpc.c builtin.c lenv.c lval.c lish.c main.c
+SOURCES_R=mpc.c linenoise.c builtin.c lenv.c lval.c lish.c main.c
 EXECUTABLE=lish
 
 SOURCE_DIR=src
@@ -12,7 +12,7 @@ LISH_VERSION=v$(LISH_MAJOR).$(LISH_MINOR).$(LISH_PATCH)
 CC=cc
 CDEFINES=-DLISH_VERSION=\"$(LISH_VERSION)\" -DLISH_MAJOR=\"$(LISH_MAJOR)\" -DLISH_MINOR=\"$(LISH_MINOR)\"
 CFLAGS=-c -std=c99 -Wall $(CDEFINES)
-LDFLAGS=-ledit -lm
+LDFLAGS=-lm
 
 SOURCES=$(SOURCES_R:%=$(SOURCE_DIR)/%)
 OBJECTS=$(SOURCES:$(SOURCE_DIR)/%.c=$(OBJECT_DIR)/%.o)

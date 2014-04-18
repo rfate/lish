@@ -1,6 +1,4 @@
-#include <editline/readline.h>
-#include <editline/history.h>
-
+#include "linenoise.h"
 #include "lish.h"
 #include "parser.h"
 #include "mpc.h"
@@ -77,8 +75,8 @@ void lish_repl(lish_t* in) {
   while (1) {
     mpc_result_t r;
 
-    char* input = readline("lish> ");
-    add_history(input);
+    char* input = linenoise("lish> ");
+    linenoiseHistoryAdd(input);
 
     if (mpc_parse("<stdin>", input, Lish, &r)) {
       lval_t* x = lval_eval(in->env, lval_read(r.output));
