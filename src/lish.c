@@ -42,6 +42,19 @@ lish_t* lish_new(void) {
   return in;
 }
 
+void lish_set_argv(lish_t* in, int argc, char** argv) {
+  lval_t* argvKey   = lval_sym("ARGV");
+  lval_t* argvConst = lval_qexpr();
+
+  for (int i = 2; i < argc; ++i) {
+    argvConst = lval_add(argvConst, lval_str(argv[i]));
+  }
+
+  lenv_def(in->env, argvKey, argvConst);
+  lval_del(argvKey);
+  lval_del(argvConst);
+}
+
 void lish_load_file(lish_t* in, char* filename, int usePath) {
   lval_t* libArgs = lval_sexpr();
   libArgs = lval_add(libArgs, lval_str(filename));

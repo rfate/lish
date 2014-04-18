@@ -9,6 +9,7 @@ typedef struct {
 } lish_t;
 
 lish_t* lish_new(void);
+void lish_set_argv(lish_t*, int, char**);
 void lish_load_file(lish_t*, char*, int);
 void lish_del(lish_t*);
 void lish_repl(lish_t*);

@@ -2,11 +2,10 @@
 
 int main(int argc, char** argv) {
 	lish_t* in = lish_new();
+  lish_set_argv(in, argc, argv);
 
-	if (argc >= 2) {
-		for (int i = 1; i < argc; ++i) {
-			lish_load_file(in, argv[i], 0);
-		}
+	if (argc > 1) {
+		lish_load_file(in, argv[1], 0);
   } else {
   	lish_repl(in);
 	}
