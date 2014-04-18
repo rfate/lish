@@ -97,6 +97,7 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "eval", builtin_eval);
   lenv_add_builtin(e, "join", builtin_join);
   lenv_add_builtin(e, "len",  builtin_len);
+  lenv_add_builtin(e, "nth",  builtin_nth);  
 
   // vars
   lenv_add_builtin(e, "def",    builtin_set);

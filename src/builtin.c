@@ -208,6 +208,32 @@ lval_t* builtin_list(lenv_t* e, lval_t* a) {
   return a;
 }
 
+/*
+ * (nth {42 64 32} 1)  => 64
+ * (nth {42 64 32} 12) => {}
+ */
+lval_t* builtin_nth(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("nth", a, 2);
+  LASSERT_ARG_TYPE("nth", a, 0, LVAL_QEXPR);
+  LASSERT_ARG_TYPE("nth", a, 1, LVAL_NUM); 
+
+  long id = a->cell[1]->num;
+  
+  if (id < 0)
+    return lval_err("Cannot access negative index %ld", id);
+
+  // 
+  if (a->cell[0]->count-1 < a->cell[1]->num)
+    return lval_qexpr();
+
+  lval_t* v = lval_take(a, 0);
+  lval_t* x = lval_pop(v, id);
+
+  lval_del(v);
+
+  return x;
+}
+
 lval_t* builtin_eval(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("eval", a, 1);
   LASSERT_ARG_TYPE("eval", a, 0, LVAL_QEXPR);
