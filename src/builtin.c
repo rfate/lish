@@ -270,8 +270,9 @@ lval_t* builtin_set(lenv_t* e, lval_t* v) { return builtin_var(e, v, "=");   }
 lval_t* builtin_puts(lenv_t* e, lval_t* v) {
   LASSERT_ARG_COUNT("puts", v, 1);
 
+  // Strings need to be handled differently so they aren't escaped.
   if (v->cell[0]->type == LVAL_STR) {
-    printf("%s", v->cell[0]->str);
+    printf("%s\n", v->cell[0]->str);
   } else {
     lval_println(v);
   }

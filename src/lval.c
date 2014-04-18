@@ -1,5 +1,4 @@
 #include <math.h>
-#include <stdbool.h>
 #include "lval.h"
 #include "lenv.h"
 #include "builtin.h"
@@ -296,7 +295,7 @@ void lval_str_print(lval_t* v) {
   free(escaped);
 }
 
-void lval_print_r(lval_t* v, bool root) {
+void lval_print_r(lval_t* v, int root) {
   switch (v->type) {
     case LVAL_NUM:
       printf("%lf", v->num);
@@ -337,11 +336,11 @@ void lval_print_r(lval_t* v, bool root) {
 }
 
 void lval_print(lval_t* v) {
-  lval_print_r(v, false);
+  lval_print_r(v, 0);
 }
 
 void lval_println(lval_t* v) {
-  lval_print_r(v, true);
+  lval_print_r(v, 1);
   putchar('\n');
 }
 

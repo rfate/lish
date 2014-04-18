@@ -1,3 +1,7 @@
+# Constants
+(def {Math.PI}  3.141592653589793)
+(def {Math.TAU} (* 2 Math.PI))
+
 (def {Math.fact} (λ {n} {
   if (<= n 1)
     { 1 }
