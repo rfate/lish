@@ -22,17 +22,19 @@ char* ltype_name(int);
   LASSERT(args, args->cell[argn]->count != 0,   \
     "Builtin \"" name "\" given empty list.")
 
-#define LASSERT_ARG_TYPE(name, args, index, _type)                      \
-  LASSERT(args, args->cell[index]->type == _type,                       \
-      "Builtin \"" name "\" expected arg %d to be of type %s, got %s.", \
-          index, ltype_name(_type), ltype_name(args->cell[index]->type));
+#define LASSERT_ARG_TYPE(name, args, index, mask)                            \
+  LASSERT(args, (mask & args->cell[index]->type) == args->cell[index]->type, \
+      "Builtin \"" name "\" expected arg %d to be of type %s, got %s.",      \
+          index, ltype_name(mask), ltype_name(args->cell[index]->type));
 
 #define LASSERT_ARG_TYPES(name, args, index, mask)                             \
   LASSERT(args, (mask & args->cell[index]->type) == args->cell[index]->type,   \
     "Builtin \"" name "\" wasn't expecting type %s for arg %d.",               \
     ltype_name(args->cell[index]->type), index);
 
-lval_t* builtin_op  (lenv_t*, lval_t*, char*);
+lval_t* builtin_op(lenv_t*, lval_t*, char*);
+
+lval_t* builtin_type(lenv_t*, lval_t*);
 
 // list handling
 lval_t* builtin_eval(lenv_t*, lval_t*);

@@ -6,6 +6,8 @@
 char* ltype_name(int t) {
   switch(t) {
     case LVAL_ERR:   return "Error";
+    case LVAL_INT:   return "Integer";
+    case LVAL_FLOAT: return "Float";
     case LVAL_NUM:   return "Number";
     case LVAL_BOOL:  return "Boolean";
     case LVAL_STR:   return "String";
@@ -18,9 +20,17 @@ char* ltype_name(int t) {
 }
 
 /// Constructors
-lval_t* lval_num(double x) {
+lval_t* lval_int(long int x) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_NUM;
+  v->type = LVAL_INT;
+  v->num  = x;
+
+  return v;
+}
+
+lval_t* lval_float(double x) {
+  lval_t* v = malloc(sizeof(lval_t));
+  v->type = LVAL_FLOAT;
   v->num  = x;
 
   return v;
@@ -109,7 +119,8 @@ lval_t* lval_lambda(lval_t* formals, lval_t* body) {
 
 void lval_del(lval_t* v) {
   switch (v->type) {
-    case LVAL_NUM:
+    case LVAL_INT:
+    case LVAL_FLOAT:
     case LVAL_BOOL:
       break;
 
@@ -142,7 +153,8 @@ lval_t* lval_truthy(lval_t* v) {
   int b;
 
   switch (v->type) {
-    case LVAL_NUM:
+    case LVAL_INT:
+    case LVAL_FLOAT:
     case LVAL_STR:
     case LVAL_FUN:
       b = 1;
@@ -166,12 +178,14 @@ lval_t* lval_truthy(lval_t* v) {
 }
 
 int lval_eq(lval_t* x, lval_t* y) {
-  // No shit, right? This ain't javascript.
-  if (x->type != y->type)
+  if ((x->type == LVAL_INT || x->type == LVAL_FLOAT)
+    && (y->type == LVAL_INT || y->type == LVAL_FLOAT)) {
+    return (x->num == y->num);
+  } else if (x->type != y->type) {
     return 0;
+  }
 
   switch (x->type) {
-    case LVAL_NUM:
     case LVAL_BOOL:
       return (x->num == y->num);
 
@@ -249,11 +263,18 @@ lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
   return lval_copy(f);
 }
 
-lval_t* lval_read_num(mpc_ast_t* t) {
+lval_t* lval_read_int(mpc_ast_t* t) {
+  errno = 0;
+  long x = strtol(t->contents, NULL, 10);
+
+  return errno != ERANGE ? lval_int(x) : lval_err("invalid integer");
+}
+
+lval_t* lval_read_float(mpc_ast_t* t) {
   errno = 0;
   double x = strtod(t->contents, NULL);
 
-  return errno != ERANGE ? lval_num(x) : lval_err("invalid number");
+  return errno != ERANGE ? lval_float(x) : lval_err("invalid float");
 }
 
 lval_t* lval_read_bool(mpc_ast_t* t) {
@@ -278,8 +299,11 @@ lval_t* lval_read_str(mpc_ast_t* t) {
 }
 
 lval_t* lval_read(mpc_ast_t* t) {
-  if (strstr(t->tag, "number"))
-    return lval_read_num(t);
+  if (strstr(t->tag, "integer"))
+    return lval_read_int(t);
+
+  if (strstr(t->tag, "float"))
+    return lval_read_float(t);
 
   if (strstr(t->tag, "boolean"))
     return lval_read_bool(t);
@@ -338,10 +362,22 @@ void lval_str_print(lval_t* v) {
   free(escaped);
 }
 
+void lval_float_print(lval_t* v) {
+  // ends in zero, print with a trailing zero
+  if (fmod(v->num, 1) == 0) {
+    printf("%.01lf", v->num);
+  } else {
+    printf("%g", v->num);
+  }
+}
+
 void lval_print_r(lval_t* v, int root) {
   switch (v->type) {
-    case LVAL_NUM:
-      printf("%lf", v->num);
+    case LVAL_INT:
+      printf("%ld", (long int) v->num);
+      break;
+    case LVAL_FLOAT:
+      lval_float_print(v);
       break;
     case LVAL_BOOL:
       printf("%s", (v->num == 0) ? "false" : "true");
@@ -439,7 +475,8 @@ lval_t* lval_copy(lval_t* v) {
   x->type = v->type;
 
   switch (v->type) {
-    case LVAL_NUM:
+    case LVAL_INT:
+    case LVAL_FLOAT:
     case LVAL_BOOL:
       x->num = v->num;
       break;

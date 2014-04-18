@@ -11,13 +11,15 @@ typedef lval_t*(*lbuiltin)(lenv_t*, lval_t*);
 
 enum {
   LVAL_ERR   =   1,
-  LVAL_NUM   =   2,
-  LVAL_BOOL  =   4,
-  LVAL_STR   =   8,
-  LVAL_SYM   =  16,
-  LVAL_FUN   =  32,
-  LVAL_SEXPR =  64,
-  LVAL_QEXPR = 128,
+  LVAL_INT   =   2,
+  LVAL_FLOAT =   4,
+  LVAL_NUM   =   6, // LVAL_INT | LVAL_FLOAT
+  LVAL_BOOL  =   8,
+  LVAL_STR   =  16,
+  LVAL_SYM   =  32,
+  LVAL_FUN   =  64,
+  LVAL_SEXPR = 128,
+  LVAL_QEXPR = 256,
 };
 
 char* ltype_name(int);
@@ -39,7 +41,8 @@ struct lval_t {
   struct lval_t** cell;
 };
 
-lval_t* lval_num(double);
+lval_t* lval_int(long int);
+lval_t* lval_float(double);
 lval_t* lval_bool(int);
 lval_t* lval_str(char*);
 lval_t* lval_err(char*, ...);

@@ -3,6 +3,12 @@
 #include "lenv.h"
 #include "parser.h"
 
+lval_t* builtin_type(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("type", a, 1);
+
+  return lval_str(ltype_name(a->cell[0]->type));
+}
+
 // This fucking blows.
 lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("substr", a, 0, LVAL_STR);
@@ -63,7 +69,7 @@ lval_t* builtin_tosym(lenv_t* e, lval_t* a) {
 lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   for (int i = 0; i < a->count; ++i)
   {
-    if (a->cell[i]->type != LVAL_NUM) {
+    if ((a->cell[i]->type & LVAL_NUM) != a->cell[i]->type) {
       lval_del(a);
       return lval_err("Cannot operate on non-number.");
     }
@@ -111,6 +117,11 @@ lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   }
 
   lval_del(a);
+
+  // if we have a remainder, convert int to float
+  if (x->type == LVAL_INT && (fmod(x->num, 1) > 0))
+    x->type = LVAL_FLOAT;
+
   return x;
 }
 
@@ -367,9 +378,9 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
   lval_t* x;
 
   if (a->cell[0]->type == LVAL_QEXPR)
-    x = lval_num(a->cell[0]->count);
+    x = lval_int(a->cell[0]->count);
   if (a->cell[0]->type == LVAL_STR)
-    x = lval_num(strlen(a->cell[0]->str));
+    x = lval_int(strlen(a->cell[0]->str));
 
   lval_del(a);
 

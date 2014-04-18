@@ -4,7 +4,8 @@
 #include "mpc.h"
 
 mpc_parser_t* Comment;
-mpc_parser_t* Number;
+mpc_parser_t* Integer;
+mpc_parser_t* Float;
 mpc_parser_t* Boolean;
 mpc_parser_t* String;
 mpc_parser_t* Symbol;

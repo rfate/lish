@@ -7,7 +7,8 @@ lish_t* lish_new(void) {
   lish_t* in = malloc(sizeof(lish_t));
 
   Comment = mpc_new("comment");
-  Number  = mpc_new("number");
+  Integer = mpc_new("integer");
+  Float   = mpc_new("float");
   Boolean = mpc_new("boolean");
   String  = mpc_new("string");
   Symbol  = mpc_new("symbol");
@@ -18,19 +19,20 @@ lish_t* lish_new(void) {
 
   mpca_lang(MPC_LANG_DEFAULT,
     "                                                     \
-      number  : /-?[0-9]+(\\.[0-9]+)?/                   ;\
+      integer : /-?[0-9]+/                               ;\
+      float   : /-?[0-9]+\\.[0-9]+/                      ;\
       string  : /\"(\\\\.|[^\"])*\"/                     ;\
       symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.\\?]+/ ;\
       boolean : \"true\" | \"false\"                     ;\
       comment : /#[^\\r\\n]*/                            ;\
       sexpr   : '(' <expr>* ')'                          ;\
       qexpr   : '{' <expr>* '}'                          ;\
-      expr    : <number> | <string> | <boolean>           \
-              | <sexpr> | <qexpr> | <comment>             \
+      expr    : <float> | <integer> | <string>            \
+              | <boolean> | <sexpr> | <qexpr> | <comment> \
               | <symbol>                                 ;\
       lish    : /^/ <expr>* /$/                          ;\
     ",
-    Number, String, Symbol, Boolean, Comment, Sexpr, Qexpr, Expr, Lish);
+    Integer, Float, String, Symbol, Boolean, Comment, Sexpr, Qexpr, Expr, Lish);
 
   in->env = lenv_new();
   lenv_add_builtins(in->env);
@@ -66,7 +68,8 @@ void lish_load_file(lish_t* in, char* filename, int usePath) {
 void lish_del(lish_t* in) {
   lenv_del(in->env);
   free(in);
-  mpc_cleanup(9, Comment, Boolean, Number, String, Symbol, Sexpr, Qexpr, Expr, Lish);
+  mpc_cleanup(10, Integer, Float, String, Symbol, Boolean, Comment,
+      Sexpr, Qexpr, Expr, Lish);
 }
 
 void lish_repl(lish_t* in) {
