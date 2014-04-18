@@ -4,8 +4,13 @@ EXECUTABLE=lish
 SOURCE_DIR=src
 OBJECT_DIR=bin
 
+LISH_MAJOR=0
+LISH_MINOR=0
+LISH_PATCH=3
+LISH_VERSION=v$(LISH_MAJOR).$(LISH_MINOR).$(LISH_PATCH)
+
 CC=cc
-CFLAGS=-c -std=c99 -Wall
+CFLAGS=-c -std=c99 -Wall -DLISH_VERSION=\"$(LISH_VERSION)\"
 LDFLAGS=-ledit -lm
 
 SOURCES=$(SOURCES_R:%=$(SOURCE_DIR)/%)
@@ -14,6 +19,7 @@ OBJECTS=$(SOURCES:$(SOURCE_DIR)/%.c=$(OBJECT_DIR)/%.o)
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
+	echo $(LISH_VERSION)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c
@@ -25,4 +31,6 @@ clean:
 
 install:
 	cp $(EXECUTABLE) /usr/local/bin
+	mkdir -p /usr/local/lib/lish/$(LISH_MAJOR).$(LISH_MINOR)/
+	cp -r lib /usr/local/lib/lish/$(LISH_MAJOR).$(LISH_MINOR)/
 

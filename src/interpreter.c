@@ -1,7 +1,6 @@
 #include <editline/readline.h>
 #include <editline/history.h>
 
-#include "lish.h"
 #include "interpreter.h"
 #include "parser.h"
 #include "mpc.h"
