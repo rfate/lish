@@ -139,6 +139,33 @@ void lval_del(lval_t* v) {
   free(v);
 }
 
+lval_t* lval_truthy(lval_t* v) {
+  int b;
+
+  switch (v->type) {
+    case LVAL_NUM:
+    case LVAL_STR:
+    case LVAL_FUN:
+      b = 1;
+      break;
+    
+    case LVAL_SEXPR:
+    case LVAL_QEXPR:
+      b = (v->count > 0);
+      break;
+
+    case LVAL_BOOL:
+      b = v->num;
+      break;
+
+    default:
+      return lval_err("Cannot discern truthiness of type %s", ltype_name(v->type));
+      break;
+  }
+
+  return lval_bool(b);
+}
+
 lval_t* lval_add(lval_t* v, lval_t* x) {
   v->count++;
   v->cell = realloc(v->cell, sizeof(lval_t*) * v->count);

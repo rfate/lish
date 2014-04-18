@@ -63,6 +63,26 @@ lval_t* builtin_mul(lenv_t* e, lval_t* v) { return builtin_op(e, v, "*"); }
 lval_t* builtin_div(lenv_t* e, lval_t* v) { return builtin_op(e, v, "/"); }
 lval_t* builtin_mod(lenv_t* e, lval_t* v) { return builtin_op(e, v, "%"); }
 
+lval_t* builtin_not(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("not", a, 1);
+
+  lval_t* x = lval_truthy(a->cell[0]);
+
+  x->num = !x->num;
+
+  lval_del(a);
+  return x;
+}
+
+lval_t* builtin_exist(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("exist", a, 1);
+
+  lval_t* x = lval_truthy(a->cell[0]);
+
+  lval_del(a);
+  return x;
+}
+
 lval_t* builtin_if(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("if", a, 3);
   LASSERT_ARG_TYPE("if", a, 0, LVAL_BOOL);

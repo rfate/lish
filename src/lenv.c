@@ -109,6 +109,8 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "*", builtin_mul);
   lenv_add_builtin(e, "/", builtin_div);
   lenv_add_builtin(e, "%", builtin_mod);
+  lenv_add_builtin(e, "!", builtin_not);
+  lenv_add_builtin(e, "?", builtin_exist);
 
   // conditionals
   lenv_add_builtin(e, "if", builtin_if);

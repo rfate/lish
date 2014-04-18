@@ -22,7 +22,7 @@ interpreter_t* interpreter_new(void) {
     "                                                     \
       number  : /-?[0-9]+(\\.[0-9]+)?/                   ;\
       string  : /\"(\\\\.|[^\"])*\"/                     ;\
-      symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.]+/    ;\
+      symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.\\?]+/ ;\
       boolean : \"true\" | \"false\"                     ;\
       comment : /#[^\\r\\n]*/                            ;\
       sexpr   : '(' <expr>* ')'                          ;\

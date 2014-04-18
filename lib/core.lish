@@ -1,5 +1,6 @@
 # Some aliases.
 (def {λ} lambda)
+(def {!!} ?)
 
 # Function shorthand.
 (def {fun} (λ {f b} {

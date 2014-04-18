@@ -57,6 +57,8 @@ lval_t* lval_join(lval_t*, lval_t*);
 lval_t* lval_read_num(mpc_ast_t*);
 lval_t* lval_read(mpc_ast_t*);
 
+lval_t* lval_truthy(lval_t*);
+
 void lval_expr_print(lval_t*, char, char);
 void lval_print(lval_t*);
 void lval_println(lval_t*);

@@ -48,6 +48,8 @@ lval_t* builtin_sub(lenv_t*, lval_t*);
 lval_t* builtin_mul(lenv_t*, lval_t*);
 lval_t* builtin_div(lenv_t*, lval_t*);
 lval_t* builtin_mod(lenv_t*, lval_t*);
+lval_t* builtin_not(lenv_t*, lval_t*);
+lval_t* builtin_exist(lenv_t*, lval_t*);
 
 // conditionals
 lval_t* builtin_if(lenv_t*, lval_t*);
