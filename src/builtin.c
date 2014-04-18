@@ -140,7 +140,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
   if (usePath) {
     dir = "/usr/local/lib/lish/" LISH_MAJOR "." LISH_MINOR "/";
   } else {
-    dir = "./";
+    dir = "";
   }
 
   char* path = malloc(strlen(dir) + strlen(a->cell[0]->str) + 1);
