@@ -228,22 +228,37 @@ lval_t* builtin_list(lenv_t* e, lval_t* a) {
  */
 lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("nth", a, 2);
-  LASSERT_ARG_TYPE("nth", a, 0, LVAL_QEXPR);
+  LASSERT_ARG_TYPES("nth", a, 0, (LVAL_QEXPR | LVAL_STR));
   LASSERT_ARG_TYPE("nth", a, 1, LVAL_NUM); 
 
   long id = a->cell[1]->num;
-  
+
   if (id < 0)
     return lval_err("Cannot access negative index %ld", id);
 
-  // 
-  if (a->cell[0]->count-1 < a->cell[1]->num)
+
+  if (a->cell[0]->type == LVAL_QEXPR) {
+ 
+    if (a->cell[0]->count-1 < id)
+      return lval_qexpr();
+
+    lval_t* v = lval_take(a, 0);
+    lval_t* x = lval_pop(v, id);
+
+    lval_del(v);
+
+    return x;
+  }
+
+  // otherwise, its gotta be a string, right?
+  if (strlen(a->cell[0]->str)-1 < id)
     return lval_qexpr();
 
-  lval_t* v = lval_take(a, 0);
-  lval_t* x = lval_pop(v, id);
-
-  lval_del(v);
+  char* str = malloc(2);
+  strncpy(str, a->cell[0]->str + id, 1);
+  str[1] = '\0';
+  lval_t* x = lval_str(str);
+  free(str);
 
   return x;
 }

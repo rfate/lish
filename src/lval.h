@@ -10,14 +10,14 @@ typedef struct lenv_t lenv_t;
 typedef lval_t*(*lbuiltin)(lenv_t*, lval_t*);
 
 enum {
-  LVAL_ERR,
-  LVAL_NUM,
-  LVAL_BOOL,
-  LVAL_STR,
-  LVAL_SYM,
-  LVAL_FUN,
-  LVAL_SEXPR,
-  LVAL_QEXPR,
+  LVAL_ERR   =   1,
+  LVAL_NUM   =   2,
+  LVAL_BOOL  =   4,
+  LVAL_STR   =   8,
+  LVAL_SYM   =  16,
+  LVAL_FUN   =  32,
+  LVAL_SEXPR =  64,
+  LVAL_QEXPR = 128,
 };
 
 char* ltype_name(int);

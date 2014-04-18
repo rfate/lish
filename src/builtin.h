@@ -16,16 +16,21 @@ char* ltype_name(int);
 
 #define LASSERT_ARG_COUNT(name, args, c) \
   LASSERT(args, args->count == c,        \
-    "Builtin '" name "' given incorrect number of arguments. Expected %d, got %d", c, args->count)
+    "Builtin \"" name "\" given incorrect number of arguments. Expected %d, got %d", c, args->count)
 
 #define LASSERT_NONEMPTY_LIST(name, args, argn) \
   LASSERT(args, args->cell[argn]->count != 0,   \
-    "Builtin '" name "' given empty list.")
+    "Builtin \"" name "\" given empty list.")
 
-#define LASSERT_ARG_TYPE(name, args, index, _type)                  \
-  LASSERT(args, args->cell[index]->type == _type,                   \
-    "Builtin '" name "' expected arg %d to be of type %s, got %s.", \
-    index, ltype_name(_type), ltype_name(args->cell[index]->type));
+#define LASSERT_ARG_TYPE(name, args, index, _type)                      \
+  LASSERT(args, args->cell[index]->type == _type,                       \
+      "Builtin \"" name "\" expected arg %d to be of type %s, got %s.", \
+          index, ltype_name(_type), ltype_name(args->cell[index]->type));
+
+#define LASSERT_ARG_TYPES(name, args, index, mask)                             \
+  LASSERT(args, (mask & args->cell[index]->type) == args->cell[index]->type,   \
+    "Builtin \"" name "\" wasn't expecting type %s for arg %d.",               \
+    ltype_name(args->cell[index]->type), index);
 
 lval_t* builtin_op  (lenv_t*, lval_t*, char*);
 
