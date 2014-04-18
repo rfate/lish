@@ -1,4 +1,4 @@
-SOURCES_R=mpc.c builtin.c lenv.c lval.c lish.c interpreter.c
+SOURCES_R=mpc.c builtin.c lenv.c lval.c lish.c main.c
 EXECUTABLE=lish
 
 SOURCE_DIR=src
