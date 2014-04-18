@@ -1,2 +1,2 @@
-#!/home/robert/code/lish/lish
+#!/usr/bin/env lish
 (puts (Math.fact 5))

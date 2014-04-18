@@ -126,12 +126,29 @@ lval_t* builtin_ge(lenv_t* e, lval_t* a) { return builtin_ord(e, a, ">="); }
 lval_t* builtin_le(lenv_t* e, lval_t* a) { return builtin_ord(e, a, "<="); }
 
 lval_t* builtin_load(lenv_t* e, lval_t* a) {
-  LASSERT_ARG_COUNT("load", a, 1);
   LASSERT_ARG_TYPE("load", a, 0, LVAL_STR);
 
-  mpc_result_t r;
+  int usePath = 0;
 
-  if (mpc_parse_contents(a->cell[0]->str, Lish, &r)) {
+  // If given a bool to specify loading from path...
+  if (a->count > 1) {
+    LASSERT_ARG_TYPE("load", a, 1, LVAL_BOOL);
+    usePath = a->cell[1]->num;
+  }
+
+  char* dir;
+  if (usePath) {
+    dir = "/usr/local/lib/lish/" LISH_MAJOR "." LISH_MINOR "/";
+  } else {
+    dir = "./";
+  }
+
+  char* path = malloc(strlen(dir) + strlen(a->cell[0]->str) + 1);
+  strcpy(path, dir);
+  strcat(path, a->cell[0]->str);
+
+  mpc_result_t r;
+  if (mpc_parse_contents(path, Lish, &r)) {
     lval_t* expr = lval_read(r.output);
     mpc_ast_delete(r.output);
 
@@ -146,6 +163,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
 
     lval_del(expr);
     lval_del(a);
+    free(path);
 
     return lval_bool(1);
   }
@@ -156,6 +174,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
   lval_t* err = lval_err("Could not load file '%s'.", err_msg);
   free(err_msg);
   lval_del(a);
+  free(path);
 
   return err;
 }

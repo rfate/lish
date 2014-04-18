@@ -10,7 +10,8 @@ LISH_PATCH=0
 LISH_VERSION=v$(LISH_MAJOR).$(LISH_MINOR).$(LISH_PATCH)
 
 CC=cc
-CFLAGS=-c -std=c99 -Wall -DLISH_VERSION=\"$(LISH_VERSION)\"
+CDEFINES=-DLISH_VERSION=\"$(LISH_VERSION)\" -DLISH_MAJOR=\"$(LISH_MAJOR)\" -DLISH_MINOR=\"$(LISH_MINOR)\"
+CFLAGS=-c -std=c99 -Wall $(CDEFINES)
 LDFLAGS=-ledit -lm
 
 SOURCES=$(SOURCES_R:%=$(SOURCE_DIR)/%)
@@ -28,7 +29,7 @@ clean:
 	rm -f $(OBJECT_DIR)/*.o
 	rm -f $(EXECUTABLE)
 
-install:
+install: all
 	cp $(EXECUTABLE) /usr/local/bin
 	mkdir -p /usr/local/lib/lish/$(LISH_MAJOR).$(LISH_MINOR)/
 	cp -r lib /usr/local/lib/lish/$(LISH_MAJOR).$(LISH_MINOR)/

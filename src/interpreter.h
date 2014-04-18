@@ -9,7 +9,7 @@ typedef struct {
 } interpreter_t;
 
 interpreter_t* interpreter_new(void);
-void interpreter_load_file(interpreter_t*, char*);
+void interpreter_load_file(interpreter_t*, char*, int);
 void interpreter_del(interpreter_t*);
 void interpreter_repl(interpreter_t*);
 

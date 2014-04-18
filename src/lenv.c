@@ -50,7 +50,7 @@ lval_t* lenv_get(lenv_t* e, lval_t* k) {
     return lenv_get(e->parent, k);
   }
 
-  return lval_err("Unbound symbol");
+  return lval_err("Unbound symbol \"%s\".", k->sym);
 }
 
 // GLOBAL define

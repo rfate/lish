@@ -37,14 +37,17 @@ interpreter_t* interpreter_new(void) {
   in->env = lenv_new();
   lenv_add_builtins(in->env);
 
-  interpreter_load_file(in, "lib/core.lish");
+  interpreter_load_file(in, "lib/core.lish", 1);
 
   return in;
 }
 
-void interpreter_load_file(interpreter_t* in, char* filename) {
-  lval_t* libName = lval_add(lval_sexpr(), lval_str(filename));
-  lval_t* lib = builtin_load(in->env, libName);
+void interpreter_load_file(interpreter_t* in, char* filename, int usePath) {
+  lval_t* libArgs = lval_sexpr();
+  libArgs = lval_add(libArgs, lval_str(filename));
+  libArgs = lval_add(libArgs, lval_bool(usePath));
+
+  lval_t* lib = builtin_load(in->env, libArgs);
   if (lib->type == LVAL_ERR) { lval_println(lib); }
   lval_del(lib);
 }

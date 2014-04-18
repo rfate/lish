@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 
 	if (argc >= 2) {
 		for (int i = 1; i < argc; ++i) {
-			interpreter_load_file(in, argv[i]);
+			interpreter_load_file(in, argv[i], 0);
 		}
   } else {
   	interpreter_repl(in);
