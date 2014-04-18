@@ -1,6 +1,8 @@
 #ifndef _LISH_PARSER_H
 #define _LISH_PARSER_H
 
+#include "mpc.h"
+
 mpc_parser_t* Comment;
 mpc_parser_t* Number;
 mpc_parser_t* String;

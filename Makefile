@@ -1,4 +1,4 @@
-SOURCE=mpc.c builtin.c lenv.c lval.c lish.c
+SOURCE=mpc.c builtin.c lenv.c lval.c lish.c interpreter.c
 
 all:
 	cc -std=c11 -Wall ${SOURCE} -ledit -lm -o lish.elf
