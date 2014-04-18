@@ -304,9 +304,16 @@ lval_t* builtin_join(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_len(lenv_t* e, lval_t* a) {
-  LASSERT_ARG_TYPE("len", a, 0, LVAL_QEXPR);
+  LASSERT_ARG_COUNT("len", a, 1);
+  LASSERT_ARG_TYPES("len", a, 0, (LVAL_QEXPR | LVAL_STR));
 
-  lval_t* x = lval_num(a->cell[0]->count);
+  lval_t* x;
+
+  if (a->cell[0]->type == LVAL_QEXPR)
+    x = lval_num(a->cell[0]->count);
+  if (a->cell[0]->type == LVAL_STR)
+    x = lval_num(strlen(a->cell[0]->str));
+
   lval_del(a);
 
   return x;
