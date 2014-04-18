@@ -8,6 +8,7 @@ char* ltype_name(int t) {
   switch(t) {
     case LVAL_ERR:   return "Error";
     case LVAL_NUM:   return "Number";
+    case LVAL_BOOL:  return "Boolean";
     case LVAL_STR:   return "String";
     case LVAL_SYM:   return "Symbol";
     case LVAL_FUN:   return "Function";
@@ -22,6 +23,14 @@ lval_t* lval_num(double x) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_NUM;
   v->num  = x;
+
+  return v;
+}
+
+lval_t* lval_bool(int x) {
+  lval_t* v = malloc(sizeof(lval_t));
+  v->type = LVAL_BOOL;
+  v->num  = (x != 0);
 
   return v;
 }
@@ -102,6 +111,7 @@ lval_t* lval_lambda(lval_t* formals, lval_t* body) {
 void lval_del(lval_t* v) {
   switch (v->type) {
     case LVAL_NUM:
+    case LVAL_BOOL:
       break;
 
     case LVAL_FUN:
@@ -177,6 +187,12 @@ lval_t* lval_read_num(mpc_ast_t* t) {
   return errno != ERANGE ? lval_num(x) : lval_err("invalid number");
 }
 
+lval_t* lval_read_bool(mpc_ast_t* t) {
+  int x = (strcmp(t->contents, "true") == 0);
+
+  return lval_bool(x);
+}
+
 lval_t* lval_read_str(mpc_ast_t* t) {
   // trim ending quote
   t->contents[strlen(t->contents) - 1] = '\0';
@@ -195,6 +211,10 @@ lval_t* lval_read_str(mpc_ast_t* t) {
 lval_t* lval_read(mpc_ast_t* t) {
   if (strstr(t->tag, "number"))
     return lval_read_num(t);
+
+  if (strstr(t->tag, "boolean"))
+    return lval_read_bool(t);
+
   if (strstr(t->tag, "symbol"))
     return lval_sym(t->contents);
 
@@ -253,6 +273,9 @@ void lval_print_r(lval_t* v, bool root) {
   switch (v->type) {
     case LVAL_NUM:
       printf("%lf", v->num);
+      break;
+    case LVAL_BOOL:
+      printf("%s", (v->num == 0) ? "false" : "true");
       break;
     case LVAL_STR:
       lval_str_print(v);
@@ -348,6 +371,7 @@ lval_t* lval_copy(lval_t* v) {
 
   switch (v->type) {
     case LVAL_NUM:
+    case LVAL_BOOL:
       x->num = v->num;
       break;
     case LVAL_FUN:

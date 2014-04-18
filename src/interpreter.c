@@ -10,6 +10,7 @@ interpreter_t* interpreter_new(void) {
 
   Comment = mpc_new("comment");
   Number  = mpc_new("number");
+  Boolean = mpc_new("boolean");
   String  = mpc_new("string");
   Symbol  = mpc_new("symbol");
   Sexpr   = mpc_new("sexpr");
@@ -22,14 +23,16 @@ interpreter_t* interpreter_new(void) {
       number  : /-?[0-9]+(\\.[0-9]+)?/                   ;\
       string  : /\"(\\\\.|[^\"])*\"/                     ;\
       symbol  : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.]+/    ;\
+      boolean : \"true\" | \"false\"                     ;\
       comment : /#[^\\r\\n]*/                            ;\
       sexpr   : '(' <expr>* ')'                          ;\
       qexpr   : '{' <expr>* '}'                          ;\
-      expr    : <number> | <string> | <symbol>            \
-              | <sexpr> | <qexpr> | <comment>            ;\
+      expr    : <number> | <string> | <boolean>           \
+              | <sexpr> | <qexpr> | <comment>             \
+              | <symbol>                                 ;\
       lish    : /^/ <expr>* /$/                          ;\
     ",
-    Number, String, Symbol, Comment, Sexpr, Qexpr, Expr, Lish);
+    Number, String, Symbol, Boolean, Comment, Sexpr, Qexpr, Expr, Lish);
 
   in->env = lenv_new();
   lenv_add_builtins(in->env);
@@ -49,7 +52,7 @@ void interpreter_load_file(interpreter_t* in, char* filename) {
 void interpreter_del(interpreter_t* in) {
   lenv_del(in->env);
   free(in);
-  mpc_cleanup(8, Comment, Number, String, Symbol, Sexpr, Qexpr, Expr, Lish);
+  mpc_cleanup(9, Comment, Boolean, Number, String, Symbol, Sexpr, Qexpr, Expr, Lish);
 }
 
 void interpreter_repl(interpreter_t* in) {

@@ -65,7 +65,7 @@ lval_t* builtin_mod(lenv_t* e, lval_t* v) { return builtin_op(e, v, "%"); }
 
 lval_t* builtin_if(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("if", a, 3);
-  LASSERT_ARG_TYPE("if", a, 0, LVAL_NUM);
+  LASSERT_ARG_TYPE("if", a, 0, LVAL_BOOL);
   LASSERT_ARG_TYPE("if", a, 1, LVAL_QEXPR);
   LASSERT_ARG_TYPE("if", a, 2, LVAL_QEXPR);
 
@@ -74,7 +74,7 @@ lval_t* builtin_if(lenv_t* e, lval_t* a) {
   a->cell[1]->type = LVAL_SEXPR;
   a->cell[2]->type = LVAL_SEXPR;
 
-  if (a->cell[0]->num) {
+  if (a->cell[0]->num != 0) {
     x = lval_eval(e, lval_pop(a, 1));
   } else {
     x = lval_eval(e, lval_pop(a, 2));
@@ -97,7 +97,7 @@ lval_t* builtin_ord(lenv_t* e, lval_t* a, char* op) {
 
   lval_del(a);
 
-  return lval_num(r);
+  return lval_bool(r);
 }
 
 lval_t* builtin_gt(lenv_t* e, lval_t* a) { return builtin_ord(e, a, ">");  }
@@ -127,7 +127,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
     lval_del(expr);
     lval_del(a);
 
-    return lval_sexpr();
+    return lval_bool(1);
   }
 
   char* err_msg = mpc_err_string(r.error);
