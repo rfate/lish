@@ -37,6 +37,7 @@ lval_t* builtin_list(lenv_t*, lval_t*);
 lval_t* builtin_join(lenv_t*, lval_t*);
 lval_t* builtin_len(lenv_t*, lval_t*);
 lval_t* builtin_nth(lenv_t*, lval_t*);
+lval_t* builtin_map(lenv_t*, lval_t*);
 
 // vars
 lval_t* builtin_def(lenv_t*, lval_t*);

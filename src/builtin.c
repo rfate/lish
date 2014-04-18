@@ -234,6 +234,23 @@ lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   return x;
 }
 
+lval_t* builtin_map(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("map", a, 2);
+  LASSERT_ARG_TYPE("map", a, 0, LVAL_QEXPR);
+  LASSERT_ARG_TYPE("map", a, 1, LVAL_FUN);
+
+  lval_t* v = lval_qexpr();
+  
+  for (int i = 0; i < a->cell[0]->count; ++i) {
+    lval_t* x = lval_sexpr();
+    x = lval_add(x, a->cell[1]);
+    x = lval_add(x, a->cell[0]->cell[i]);
+    v = lval_add(v, lval_eval(e, x));
+  }
+
+  return v;
+}
+
 lval_t* builtin_eval(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("eval", a, 1);
   LASSERT_ARG_TYPE("eval", a, 0, LVAL_QEXPR);
