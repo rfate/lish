@@ -3,6 +3,53 @@
 #include "lenv.h"
 #include "parser.h"
 
+// This fucking blows.
+lval_t* builtin_substr(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_TYPE("substr", a, 0, LVAL_STR);
+
+  // Don't know why this would be needed, but if provided
+  // only a string, return the full string.
+  if (a->count == 1)
+    return a->cell[0];
+
+  LASSERT_ARG_TYPE("substr", a, 1, LVAL_NUM);
+
+  int length = strlen(a->cell[0]->str);
+  int start  = a->cell[1]->num;
+  int end;
+
+  if (a->count > 2) {
+    LASSERT_ARG_TYPE("substr", a, 2, LVAL_NUM);
+    end = a->cell[2]->num;
+  } else {
+    end = length - 1;
+  }
+
+  if (start < 0 || end < 0) {
+    lval_del(a);
+    return lval_err("Builtin \"substr\" doesn't know wtf to do with a negative index.");
+  }
+
+  if (start > end) {
+    lval_del(a);
+    return lval_err("Builtin \"substr\" requires end of range to be higher than start.");
+  }
+
+  if (start > length || end > length) {
+    lval_del(a);
+    return lval_err("Builtin \"substr\" tried to reach out of string bounds.");
+  }
+
+  char* newString = malloc(end - start + 1);
+  strncpy(newString, &a->cell[0]->str[start], end - start);
+  newString[end - start] = '\0';
+  
+  lval_t* x = lval_str(newString);
+  free(newString);
+  lval_del(a);
+  return x;
+}
+
 lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   for (int i = 0; i < a->count; ++i)
   {

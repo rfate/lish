@@ -100,6 +100,9 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "nth",  builtin_nth);
   lenv_add_builtin(e, "map",  builtin_map);
 
+  // string
+  lenv_add_builtin(e, "substr", builtin_substr);
+
   // vars
   lenv_add_builtin(e, "def",    builtin_set);
   lenv_add_builtin(e, "=",      builtin_def);
