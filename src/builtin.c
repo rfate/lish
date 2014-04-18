@@ -50,6 +50,16 @@ lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   return x;
 }
 
+lval_t* builtin_tosym(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("tosym", a, 1);
+  LASSERT_ARG_TYPE("tosym", a, 0, LVAL_STR);
+
+  lval_t* x = lval_sym(a->cell[0]->str);
+  lval_del(a);
+
+  return x;
+}
+
 lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   for (int i = 0; i < a->count; ++i)
   {

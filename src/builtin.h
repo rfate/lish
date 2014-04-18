@@ -46,6 +46,7 @@ lval_t* builtin_map(lenv_t*, lval_t*);
 
 // strings
 lval_t* builtin_substr(lenv_t*, lval_t*);
+lval_t* builtin_tosym(lenv_t*, lval_t*);
 
 // vars
 lval_t* builtin_def(lenv_t*, lval_t*);
