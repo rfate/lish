@@ -79,6 +79,10 @@ void lish_repl(lish_t* in) {
     mpc_result_t r;
 
     char* input = linenoise("lish> ");
+
+    if (!input)
+      break;
+
     linenoiseHistoryAdd(input);
 
     if (mpc_parse("<stdin>", input, Lish, &r)) {
