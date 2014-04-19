@@ -326,8 +326,6 @@ lval_t* lval_read_table_pair(mpc_ast_t* t) {
 lval_t* lval_read_table(mpc_ast_t* t) {
   lval_t* x = lval_table();
 
-  mpc_ast_print(t);
-
   for (int i = 0; i < t->children_num; ++i) {
     if (strstr(t->children[i]->tag, "tablepair")) {
       lval_t* p = lval_read_table_pair(t->children[i]);
@@ -416,7 +414,16 @@ void lval_float_print(lval_t* v) {
 }
 
 void lval_table_print(lval_t* v) {
-  printf("[tablelol]");
+  printf("[");
+
+  for (int i = 0; i < v->env->count; ++i) {
+    if (i > 0) { printf(","); }
+
+    printf(" %s := ", v->env->syms[i]);
+    lval_print(v->env->vals[i]);
+  }
+
+  printf(" ]");
 }
 
 void lval_print_r(lval_t* v, int root) {
