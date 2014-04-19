@@ -45,6 +45,9 @@ lval_t* builtin_len(lenv_t*, lval_t*);
 lval_t* builtin_nth(lenv_t*, lval_t*);
 lval_t* builtin_map(lenv_t*, lval_t*);
 
+// tables
+lval_t* builtin_el(lenv_t*, lval_t*);
+
 // strings
 lval_t* builtin_substr(lenv_t*, lval_t*);
 lval_t* builtin_tosym(lenv_t*, lval_t*);

@@ -15,6 +15,7 @@ char* ltype_name(int t) {
     case LVAL_FUN:   return "Function";
     case LVAL_SEXPR: return "S-Expression";
     case LVAL_QEXPR: return "Q-Expression";
+    case LVAL_TABLE: return "Table";
     default:         return "Unknown";
   }
 }
@@ -115,6 +116,14 @@ lval_t* lval_lambda(lval_t* formals, lval_t* body) {
 
   return v;
 }
+
+lval_t* lval_table(void) {
+  lval_t* v = malloc(sizeof(lval_t));
+  v->type = LVAL_TABLE;
+  v->env = lenv_new();
+
+  return v;
+}
 ///
 
 void lval_del(lval_t* v) {
@@ -122,6 +131,10 @@ void lval_del(lval_t* v) {
     case LVAL_INT:
     case LVAL_FLOAT:
     case LVAL_BOOL:
+      break;
+
+    case LVAL_TABLE:
+      lenv_del(v->env);
       break;
 
     case LVAL_FUN:
@@ -298,6 +311,34 @@ lval_t* lval_read_str(mpc_ast_t* t) {
   return str;
 }
 
+lval_t* lval_read_table_pair(mpc_ast_t* t) {
+  lval_t* x = lval_qexpr();
+
+  for (int i = 0; i < t->children_num; ++i) {
+    if (strcmp(t->children[i]->contents, ":=") == 0)  { continue; }
+
+    x = lval_add(x, lval_read(t->children[i]));
+  }
+
+  return x;
+}
+
+lval_t* lval_read_table(mpc_ast_t* t) {
+  lval_t* x = lval_table();
+
+  mpc_ast_print(t);
+
+  for (int i = 0; i < t->children_num; ++i) {
+    if (strstr(t->children[i]->tag, "tablepair")) {
+      lval_t* p = lval_read_table_pair(t->children[i]);
+      lenv_set(x->env, p->cell[0], p->cell[1]);
+      lval_del(p);
+    }
+  }
+
+  return x;
+}
+
 lval_t* lval_read(mpc_ast_t* t) {
   if (strstr(t->tag, "integer"))
     return lval_read_int(t);
@@ -312,7 +353,10 @@ lval_t* lval_read(mpc_ast_t* t) {
     return lval_sym(t->contents);
 
   if (strstr(t->tag, "string"))
-    return lval_read_str(t);  
+    return lval_read_str(t);
+
+  if (strstr(t->tag, "table")) 
+    return lval_read_table(t);
 
   lval_t* x = NULL;
   if (strcmp(t->tag, ">") == 0) { x = lval_sexpr(); }
@@ -371,6 +415,10 @@ void lval_float_print(lval_t* v) {
   }
 }
 
+void lval_table_print(lval_t* v) {
+  printf("[tablelol]");
+}
+
 void lval_print_r(lval_t* v, int root) {
   switch (v->type) {
     case LVAL_INT:
@@ -410,6 +458,12 @@ void lval_print_r(lval_t* v, int root) {
       break;
     case LVAL_QEXPR:
       lval_expr_print(v, '{', '}');
+      break;
+    case LVAL_TABLE:
+      lval_table_print(v);
+      break;
+    default:
+      printf("<unprintable type>");
       break;
   }
 }
@@ -489,6 +543,10 @@ lval_t* lval_copy(lval_t* v) {
         x->formals = lval_copy(v->formals);
         x->body    = lval_copy(v->body);
       }
+      break;
+
+    case LVAL_TABLE:
+      x->env = lenv_copy(v->env);
       break;
 
     case LVAL_STR:

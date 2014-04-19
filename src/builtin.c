@@ -3,6 +3,19 @@
 #include "lenv.h"
 #include "parser.h"
 
+lval_t* builtin_el(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("el", a, 2);
+  LASSERT_ARG_TYPE("el", a, 0, LVAL_TABLE);
+
+  if (a->cell[1]->type != LVAL_STR && a->cell[1]->type != LVAL_SYM) {
+    lval_del(a);
+    return lval_err("Builtin \"el\" cannot access index of non-index type %d",
+      ltype_name(a->cell[1]->type));
+  }
+
+  return lenv_get(a->cell[0]->env, a->cell[1]);
+}
+
 lval_t* builtin_type(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("type", a, 1);
 
@@ -381,7 +394,7 @@ lval_t* builtin_join(lenv_t* e, lval_t* a) {
 
 lval_t* builtin_len(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("len", a, 1);
-  LASSERT_ARG_TYPES("len", a, 0, (LVAL_QEXPR | LVAL_STR));
+  LASSERT_ARG_TYPES("len", a, 0, (LVAL_QEXPR | LVAL_STR | LVAL_TABLE));
 
   lval_t* x;
 
@@ -389,6 +402,8 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
     x = lval_int(a->cell[0]->count);
   if (a->cell[0]->type == LVAL_STR)
     x = lval_int(strlen(a->cell[0]->str));
+  if (a->cell[0]->type == LVAL_TABLE)
+    x = lval_int(a->cell[0]->env->count);
 
   lval_del(a);
 

@@ -40,9 +40,10 @@ lenv_t* lenv_copy(lenv_t* e) {
 }
 
 lval_t* lenv_get(lenv_t* e, lval_t* k) {
-  for (int i = 0; i < e->count; ++i)
-  {
-    if (strcmp(e->syms[i], k->sym) == 0)
+  char* key = (k->type == LVAL_STR) ? k->str : k->sym;
+
+  for (int i = 0; i < e->count; ++i) {
+    if (strcmp(e->syms[i], key) == 0)
       return lval_copy(e->vals[i]);
   }
 
@@ -50,7 +51,7 @@ lval_t* lenv_get(lenv_t* e, lval_t* k) {
     return lenv_get(e->parent, k);
   }
 
-  return lval_err("Unbound symbol \"%s\".", k->sym);
+  return lval_err("Unbound symbol \"%s\".", key);
 }
 
 // GLOBAL define
@@ -62,8 +63,11 @@ void lenv_def(lenv_t* e, lval_t* k, lval_t* v) {
 }
 
 void lenv_set(lenv_t* e, lval_t* k, lval_t* v) {
+  char* key = (k->type == LVAL_STR) ? k->str : k->sym;
+
   for (int i = 0; i < e->count; ++i) {
-    if (strcmp(e->syms[i], k->sym) == 0) {
+
+    if (strcmp(e->syms[i], key) == 0) {
       lval_del(e->vals[i]);
       e->vals[i] = lval_copy(v);
       return;
@@ -75,8 +79,8 @@ void lenv_set(lenv_t* e, lval_t* k, lval_t* v) {
   e->syms = realloc(e->syms, sizeof(char*)   * e->count);
 
   e->vals[e->count - 1] = lval_copy(v);
-  e->syms[e->count - 1] = malloc(strlen(k->sym) + 1);
-  strcpy(e->syms[e->count - 1], k->sym);
+  e->syms[e->count - 1] = malloc(strlen(key) + 1);
+  strcpy(e->syms[e->count - 1], key);
 }
 
 void lenv_add_builtin(lenv_t* e, char* name, lbuiltin func) {
@@ -91,6 +95,7 @@ void lenv_add_builtin(lenv_t* e, char* name, lbuiltin func) {
 
 void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "type", builtin_type);
+ 
   // list
   lenv_add_builtin(e, "list", builtin_list);
   lenv_add_builtin(e, "head", builtin_head);
@@ -100,6 +105,9 @@ void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "len",  builtin_len);
   lenv_add_builtin(e, "nth",  builtin_nth);
   lenv_add_builtin(e, "map",  builtin_map);
+
+  // table
+  lenv_add_builtin(e, "el", builtin_el);
 
   // string
   lenv_add_builtin(e, "substr", builtin_substr);

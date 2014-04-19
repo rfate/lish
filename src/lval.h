@@ -13,13 +13,15 @@ enum {
   LVAL_ERR   =   1,
   LVAL_INT   =   2,
   LVAL_FLOAT =   4,
-  LVAL_NUM   =   6, // LVAL_INT | LVAL_FLOAT
   LVAL_BOOL  =   8,
   LVAL_STR   =  16,
   LVAL_SYM   =  32,
   LVAL_FUN   =  64,
   LVAL_SEXPR = 128,
   LVAL_QEXPR = 256,
+  LVAL_TABLE = 512,
+  // ORs
+  LVAL_NUM   = (LVAL_INT | LVAL_FLOAT), // LVAL_INT | LVAL_FLOAT
 };
 
 char* ltype_name(int);
@@ -51,6 +53,7 @@ lval_t* lval_fun(lbuiltin);
 lval_t* lval_sexpr(void);
 lval_t* lval_qexpr(void);
 lval_t* lval_lambda(lval_t*, lval_t*);
+lval_t* lval_table(void);
 
 void    lval_del(lval_t*);
 lval_t* lval_copy(lval_t*);
