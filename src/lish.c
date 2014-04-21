@@ -57,7 +57,7 @@ void lish_set_argv(lish_t* in, int argc, char** argv) {
   lval_t* argvKey   = lval_sym("ARGV");
   lval_t* argvConst = lval_qexpr();
 
-  for (int i = 2; i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) {
     argvConst = lval_add(argvConst, lval_str(argv[i]));
   }
 
