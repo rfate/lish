@@ -315,7 +315,7 @@ lval_t* lval_read_table_pair(mpc_ast_t* t) {
   lval_t* x = lval_qexpr();
 
   for (int i = 0; i < t->children_num; ++i) {
-    if (strcmp(t->children[i]->contents, ":=") == 0)  { continue; }
+    if (strcmp(t->children[i]->contents, "=") == 0)  { continue; }
 
     x = lval_add(x, lval_read(t->children[i]));
   }
@@ -325,6 +325,8 @@ lval_t* lval_read_table_pair(mpc_ast_t* t) {
 
 lval_t* lval_read_table(mpc_ast_t* t) {
   lval_t* x = lval_table();
+
+	mpc_ast_print(t);
 
   for (int i = 0; i < t->children_num; ++i) {
     if (strstr(t->children[i]->tag, "tablepair")) {
@@ -419,7 +421,7 @@ void lval_table_print(lval_t* v) {
   for (int i = 0; i < v->env->count; ++i) {
     if (i > 0) { printf(","); }
 
-    printf(" %s := ", v->env->syms[i]);
+    printf(" %s = ", v->env->syms[i]);
     lval_print(v->env->vals[i]);
   }
 

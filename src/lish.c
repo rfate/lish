@@ -23,27 +23,27 @@ lish_t* lish_new(void) {
 
   mpca_lang(MPC_LANG_DEFAULT,
     "                                                            \
+      tablekey : <symbol> | <string>                            ;\
+      tableval : <float> | <integer> | <string> | <symbol>      ;\
+      tablepair: <tablekey> \"=\" <tableval>                    ;\
+      table    : '[' <tablepair>+ (/, */ <tablepair>)* ']' ;\
+                                                                 \
       integer  : /-?[0-9]+/                                     ;\
       float    : /-?[0-9]+\\.[0-9]+/                            ;\
       string   : /\"(\\\\.|[^\"])*\"/                           ;\
       symbol   : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&%λ\\.\\?]+/       ;\
-                                                                 \
-      tablekey : <symbol> | <string>                            ;\
-      tableval : <float> | <integer> | <string> | <symbol>      ;\
-      tablepair: <tablekey> \":=\" <tableval>                   ;\
-      table    : '[' ((<tablepair>+) (/, */ <tablepair>)*)* ']' ;\
-                                                                 \
       boolean  : \"true\" | \"false\"                           ;\
       comment  : /#[^\\r\\n]*/                                  ;\
       sexpr    : '(' <expr>* ')'                                ;\
       qexpr    : '{' <expr>* '}'                                ;\
+                                                                 \
       expr     : <float> | <integer> | <string> | <boolean>      \
                | <sexpr> | <qexpr>  | <comment> | <symbol>       \
                | <table>                                        ;\
       lish     : /^/ <expr>* /$/                                ;\
     ",
-    Integer, Float, String, Symbol, TableKey, TableVal, TablePair,
-        Table, Boolean, Comment, Sexpr, Qexpr, Expr, Lish);
+			TableKey, TableVal, TablePair, Table, Integer, Float, String, Symbol,
+				Boolean, Comment, Sexpr, Qexpr, Expr, Lish);
 
   in->env = lenv_new();
   lenv_add_builtins(in->env);
