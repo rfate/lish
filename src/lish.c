@@ -1,6 +1,5 @@
 #include "linenoise.h"
 #include "lish.h"
-#include "parser.h"
 #include "mpc.h"
 
 lish_t* lish_new(void) {
@@ -58,7 +57,7 @@ void lish_repl(lish_t* in) {
 
     linenoiseHistoryAdd(input);
 
-    if (mpc_parse("<stdin>", input, Lish, &r)) {
+    if (mpc_parse("<stdin>", input, parser_lish, &r)) {
       lval_t* x = lval_eval(in->env, lval_read(r.output));
       lval_println(x);
       lval_del(x);

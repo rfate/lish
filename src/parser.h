@@ -3,21 +3,21 @@
 
 #include "mpc.h"
 
-mpc_parser_t* Comment;
-mpc_parser_t* Integer;
-mpc_parser_t* Float;
-mpc_parser_t* Boolean;
-mpc_parser_t* String;
-mpc_parser_t* Symbol;
-mpc_parser_t* Operator;
-mpc_parser_t* TableKey;
-mpc_parser_t* TableVal;
-mpc_parser_t* TablePair;
-mpc_parser_t* Table;
-mpc_parser_t* Sexpr;
-mpc_parser_t* Qexpr;
-mpc_parser_t* Expr;
-mpc_parser_t* Lish;
+mpc_parser_t* parser_comment;
+mpc_parser_t* parser_integer;
+mpc_parser_t* parser_float;
+mpc_parser_t* parser_boolean;
+mpc_parser_t* parser_string;
+mpc_parser_t* parser_symbol;
+mpc_parser_t* parser_operator;
+mpc_parser_t* parser_tablekey;
+mpc_parser_t* parser_tableval;
+mpc_parser_t* parser_tablepair;
+mpc_parser_t* parser_table;
+mpc_parser_t* parser_sexpr;
+mpc_parser_t* parser_qexpr;
+mpc_parser_t* parser_expr;
+mpc_parser_t* parser_lish;
 
 void parser_init(void);
 void parser_cleanup(void);

@@ -262,7 +262,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
   strcat(path, a->cell[0]->data.str);
 
   mpc_result_t r;
-  if (mpc_parse_contents(path, Lish, &r)) {
+  if (mpc_parse_contents(path, parser_lish, &r)) {
     lval_t* expr = lval_read(r.output);
     mpc_ast_delete(r.output);
 
