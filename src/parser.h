@@ -9,6 +9,7 @@ mpc_parser_t* parser_float;
 mpc_parser_t* parser_boolean;
 mpc_parser_t* parser_string;
 mpc_parser_t* parser_symbol;
+mpc_parser_t* parser_litsymbol;
 mpc_parser_t* parser_operator;
 mpc_parser_t* parser_tablekey;
 mpc_parser_t* parser_tableval;

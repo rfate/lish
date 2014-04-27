@@ -15,7 +15,7 @@ lish_t* lish_new(void) {
 }
 
 void lish_set_argv(lish_t* in, int argc, char** argv) {
-  lval_t* argvKey   = lval_sym("ARGV");
+  lval_t* argvKey   = lval_sym("ARGV", 0);
   lval_t* argvConst = lval_qexpr();
 
   for (int i = 1; i < argc; ++i) {

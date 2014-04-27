@@ -33,7 +33,11 @@ struct lval_t {
     double   num;
     char*    str;
     char*    err;
-    char*    sym;
+
+    struct {
+      char* name;
+      int   lit;
+    } sym;
 
     struct {
       lbuiltin builtin;
@@ -53,7 +57,7 @@ lval_t* lval_float(double);
 lval_t* lval_bool(int);
 lval_t* lval_str(char*);
 lval_t* lval_err(char*, ...);
-lval_t* lval_sym(char*);
+lval_t* lval_sym(char*, int);
 lval_t* lval_fun(lbuiltin);
 lval_t* lval_sexpr(void);
 lval_t* lval_qexpr(void);

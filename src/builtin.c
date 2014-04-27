@@ -92,7 +92,7 @@ lval_t* builtin_tosym(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("tosym", a, 1);
   LASSERT_ARG_TYPE("tosym", a, 0, LVAL_STR);
 
-  lval_t* x = lval_sym(a->cell[0]->data.str);
+  lval_t* x = lval_sym(a->cell[0]->data.str, 1);
   lval_del(a);
 
   return x;
@@ -298,9 +298,13 @@ lval_t* builtin_head(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("head", a, 0, LVAL_QEXPR);
   LASSERT_NONEMPTY_LIST("head", a, 0);
 
-  lval_t* v = lval_take(a, 0);
+/*  lval_t* v = lval_take(a, 0);
   while (v->count > 1)
-    lval_del(lval_pop(v, 1));
+    lval_del(lval_pop(v, 1));*/
+
+  lval_t* v = lval_copy(a->cell[0]->cell[0]);
+
+  lval_del(a);
 
   return v;
 }
@@ -424,23 +428,13 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_var(lenv_t* e, lval_t* a, char* func) {
-  LASSERT_ARG_TYPE("var??", a, 0, LVAL_QEXPR);
+  LASSERT_ARG_COUNT("var??", a, 2);
+  LASSERT_ARG_TYPE("var??", a, 0, LVAL_SYM);
 
-  lval_t* syms = a->cell[0];
-
-  for (int i = 0; i < syms->count; ++i) {
-    LASSERT(a, (syms->cell[i]->type == LVAL_SYM), "Builtin '%s' cannot define non-symbol.", func);
-  }
-
-  LASSERT(a, (syms->count == a->count-1), "Builtin '%s' cannot assign incorrect number of values to symbols. Expected %d, got %d.",
-    func, syms->count, a->count-1);
-
-  for (int i = 0; i < syms->count; ++i) {
-    if (strcmp(func, "def") == 0)
-      lenv_set(e, syms->cell[i], a->cell[i+1]);
-    if (strcmp(func, "=") == 0)
-      lenv_def(e, syms->cell[i], a->cell[i+1]);
-  }
+  if (strcmp(func, "def") == 0)
+    lenv_set(e, a->cell[0], a->cell[1]);
+  if (strcmp(func, "=") == 0)
+    lenv_def(e, a->cell[0], a->cell[1]);
 
   lval_del(a);
 

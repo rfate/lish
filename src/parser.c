@@ -7,6 +7,7 @@ void parser_init(void) {
   parser_boolean   = mpc_new("boolean");
   parser_string    = mpc_new("string");
   parser_symbol    = mpc_new("symbol");
+  parser_litsymbol = mpc_new("litsymbol");
   parser_operator  = mpc_new("operator");
   parser_tablekey  = mpc_new("tablekey");
   parser_tableval  = mpc_new("tableval");
@@ -27,29 +28,30 @@ void parser_init(void) {
       integer  : /-?[0-9]+/                                     ;\
       float    : /-?[0-9]+\\.[0-9]+/                            ;\
       string   : /\"(\\\\.|[^\"])*\"/                           ;\
-      symbol   : /[a-zA-Z0-9_\\/\\\\λ\\.]+/                     ;\
-      operator : /[\\?=<>!&%+\\-*]+/                            ;\
+      symbol   : /[a-zA-Z0-9_\\/\\\\λ\\.!]+/                    ;\
+      litsymbol: '@'<symbol>                                    ;\
+      operator : /[\\?=<>&%+\\-*]+/                             ;\
       boolean  : \"true\" | \"false\"                           ;\
       comment  : /#[^\\r\\n]*/                                  ;\
       sexpr    : '(' <expr>* ')'                                ;\
       qexpr    : '{' <expr>* '}'                                ;\
                                                                  \
       expr     : <float> | <integer> | <string> | <boolean>      \
-               | <sexpr> | <qexpr>  | <comment> | <symbol>       \
-               | <operator> | <table>                           ;\
+               | <sexpr> | <qexpr>  | <comment> | <litsymbol>    \
+               | <symbol> | <operator> | <table>                ;\
                                                                  \
       lish     : /^/ <expr>* /$/                                ;\
     ",
 			parser_tablekey, parser_tableval, parser_tablepair, parser_table,
       parser_integer, parser_float, parser_string, parser_symbol,
-      parser_operator, parser_boolean, parser_comment, parser_sexpr,
-      parser_qexpr, parser_expr, parser_lish);
+      parser_litsymbol, parser_operator, parser_boolean, parser_comment,
+      parser_sexpr, parser_qexpr, parser_expr, parser_lish);
 }
 
 void parser_cleanup(void) {
-  mpc_cleanup(14, parser_tablekey, parser_tableval, parser_tablepair,
+  mpc_cleanup(15, parser_tablekey, parser_tableval, parser_tablepair,
     parser_table, parser_integer, parser_float, parser_string,
     parser_symbol, parser_operator, parser_boolean, parser_comment,
-    parser_sexpr, parser_qexpr, parser_expr, parser_lish);
+    parser_litsymbol, parser_sexpr, parser_qexpr, parser_expr, parser_lish);
 }
 

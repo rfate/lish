@@ -71,11 +71,12 @@ lval_t* lval_err(char* fmt, ...) {
   return v;
 }
 
-lval_t* lval_sym(char* sym) {
+lval_t* lval_sym(char* sym, int lit) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type     = LVAL_SYM;
-  v->data.sym = malloc(strlen(sym) + 1);
-  strcpy(v->data.sym, sym);
+  v->type          = LVAL_SYM;
+  v->data.sym.lit  = lit;
+  v->data.sym.name = malloc(strlen(sym) + 1);
+  strcpy(v->data.sym.name, sym);
 
   return v;
 }
@@ -147,7 +148,7 @@ void lval_del(lval_t* v) {
 
     case LVAL_STR: free(v->data.str); break;
     case LVAL_ERR: free(v->data.err); break;
-    case LVAL_SYM: free(v->data.sym); break;
+    case LVAL_SYM: free(v->data.sym.name); break;
 
     case LVAL_SEXPR:
     case LVAL_QEXPR:
@@ -209,7 +210,8 @@ int lval_eq(lval_t* x, lval_t* y) {
       return (strcmp(x->data.err, y->data.err) == 0);
 
     case LVAL_SYM:
-      return (strcmp(x->data.sym, y->data.sym) == 0);
+      return (strcmp(x->data.sym.name, y->data.sym.name) == 0
+            || x->data.sym.lit == y->data.sym.lit);
 
     case LVAL_FUN:
       if (x->data.func.builtin || y->data.func.builtin) {
@@ -349,8 +351,11 @@ lval_t* lval_read(mpc_ast_t* t) {
   if (strstr(t->tag, "boolean"))
     return lval_read_bool(t);
 
+  if (strstr(t->tag, "litsymbol"))
+    return lval_sym(t->children[1]->contents, 1);
+
   if (strstr(t->tag, "symbol") || strstr(t->tag, "operator"))
-    return lval_sym(t->contents);
+    return lval_sym(t->contents, 0);
 
   if (strstr(t->tag, "string"))
     return lval_read_str(t);
@@ -446,7 +451,11 @@ void lval_print_r(lval_t* v, int root) {
       printf("Error: %s", v->data.err);
       break;
     case LVAL_SYM:
-      printf("%s", v->data.sym);
+      if (v->data.sym.lit) {
+        printf("@%s", v->data.sym.name);
+      } else {
+        printf("%s", v->data.sym.name);
+      }
       break;
     case LVAL_FUN:
       if (v->data.func.builtin) {
@@ -472,7 +481,7 @@ void lval_print_r(lval_t* v, int root) {
       lval_table_print(v);
       break;
     default:
-      printf("<unprintable type>");
+      printf("<unprintable type: %s>", ltype_name(v->type));
       break;
   }
 }
@@ -569,8 +578,9 @@ lval_t* lval_copy(lval_t* v) {
       break;
 
     case LVAL_SYM:
-      x->data.sym = malloc(strlen(v->data.sym) + 1);
-      strcpy(x->data.sym, v->data.sym);
+      x->data.sym.lit = v->data.sym.lit;
+      x->data.sym.name = malloc(strlen(v->data.sym.name) + 1);
+      strcpy(x->data.sym.name, v->data.sym.name);
       break;
 
     case LVAL_SEXPR:

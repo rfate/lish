@@ -39,7 +39,10 @@ lenv_t* lenv_copy(lenv_t* e) {
 }
 
 lval_t* lenv_get(lenv_t* e, lval_t* k) {
-  char* key = (k->type == LVAL_STR) ? k->data.str : k->data.sym;
+  if (k->type == LVAL_SYM && k->data.sym.lit)
+    return lval_copy(k);
+
+  char* key = (k->type == LVAL_STR) ? k->data.str : k->data.sym.name;
 
   for (int i = 0; i < e->count; ++i) {
     if (strcmp(e->syms[i], key) == 0)
@@ -61,7 +64,7 @@ void lenv_def(lenv_t* e, lval_t* k, lval_t* v) {
 }
 
 void lenv_set(lenv_t* e, lval_t* k, lval_t* v) {
-  char* key = (k->type == LVAL_STR) ? k->data.str : k->data.sym;
+  char* key = (k->type == LVAL_STR) ? k->data.str : k->data.sym.name;
 
   for (int i = 0; i < e->count; ++i) {
     if (strcmp(e->syms[i], key) == 0) {
@@ -81,7 +84,7 @@ void lenv_set(lenv_t* e, lval_t* k, lval_t* v) {
 }
 
 void lenv_add_builtin(lenv_t* e, char* name, lbuiltin func) {
-  lval_t* k = lval_sym(name);
+  lval_t* k = lval_sym(name, 0);
   lval_t* v = lval_fun(func);
 
   lenv_set(e, k, v);

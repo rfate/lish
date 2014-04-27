@@ -1,12 +1,11 @@
 # Function shorthand.
-(def {fun} (lambda {f b} {
+(def @fun (lambda {f b} {
   def (head f) (lambda (tail f) b)
 }))
 
 # Some aliases.
-(def {λ}  lambda)
-(def {!!} ?)
-(def {->} fun)
+(def @λ  lambda)
+(def @!! ?)
 
 # Load other modules.
 (load "lib/math.lish" true)
