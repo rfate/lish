@@ -9,6 +9,7 @@ mpc_parser_t* Float;
 mpc_parser_t* Boolean;
 mpc_parser_t* String;
 mpc_parser_t* Symbol;
+mpc_parser_t* Operator;
 mpc_parser_t* TableKey;
 mpc_parser_t* TableVal;
 mpc_parser_t* TablePair;
@@ -17,6 +18,9 @@ mpc_parser_t* Sexpr;
 mpc_parser_t* Qexpr;
 mpc_parser_t* Expr;
 mpc_parser_t* Lish;
+
+void parser_init(void);
+void parser_cleanup(void);
 
 #endif
 

@@ -326,8 +326,6 @@ lval_t* lval_read_table_pair(mpc_ast_t* t) {
 lval_t* lval_read_table(mpc_ast_t* t) {
   lval_t* x = lval_table();
 
-	mpc_ast_print(t);
-
   for (int i = 0; i < t->children_num; ++i) {
     if (strstr(t->children[i]->tag, "tablepair")) {
       lval_t* p = lval_read_table_pair(t->children[i]);
@@ -349,7 +347,7 @@ lval_t* lval_read(mpc_ast_t* t) {
   if (strstr(t->tag, "boolean"))
     return lval_read_bool(t);
 
-  if (strstr(t->tag, "symbol"))
+  if (strstr(t->tag, "symbol") || strstr(t->tag, "operator"))
     return lval_sym(t->contents);
 
   if (strstr(t->tag, "string"))
