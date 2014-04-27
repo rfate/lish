@@ -21,7 +21,7 @@ enum {
   LVAL_QEXPR = 256,
   LVAL_TABLE = 512,
   // ORs
-  LVAL_NUM   = (LVAL_INT | LVAL_FLOAT), // LVAL_INT | LVAL_FLOAT
+  LVAL_NUM   = (LVAL_INT | LVAL_FLOAT),
 };
 
 char* ltype_name(int);
@@ -29,15 +29,20 @@ char* ltype_name(int);
 struct lval_t {
   int type;
 
-  double   num;
-  char*    str;
-  char*    err;
-  char*    sym;
+  union {  
+    double   num;
+    char*    str;
+    char*    err;
+    char*    sym;
 
-  lbuiltin builtin;
+    struct {
+      lbuiltin builtin;
+      lval_t*  formals;
+      lval_t*  body;
+    } func;
+  } data;
+
   lenv_t*  env;
-  lval_t*  formals;
-  lval_t*  body;
 
   int             count;
   struct lval_t** cell;

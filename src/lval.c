@@ -24,7 +24,7 @@ char* ltype_name(int t) {
 lval_t* lval_int(long int x) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_INT;
-  v->num  = x;
+  v->data.num  = x;
 
   return v;
 }
@@ -32,7 +32,7 @@ lval_t* lval_int(long int x) {
 lval_t* lval_float(double x) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_FLOAT;
-  v->num  = x;
+  v->data.num  = x;
 
   return v;
 }
@@ -40,7 +40,7 @@ lval_t* lval_float(double x) {
 lval_t* lval_bool(int x) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_BOOL;
-  v->num  = (x != 0);
+  v->data.num  = (x != 0);
 
   return v;
 }
@@ -48,8 +48,8 @@ lval_t* lval_bool(int x) {
 lval_t* lval_str(char* str) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_STR;
-  v->str  = malloc(strlen(str) + 1);
-  strcpy(v->str, str);
+  v->data.str  = malloc(strlen(str) + 1);
+  strcpy(v->data.str, str);
   
   return v;
 }
@@ -61,10 +61,10 @@ lval_t* lval_err(char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
 
-  v->err = malloc(512);
-  vsnprintf(v->err, 511, fmt, va);
+  v->data.err = malloc(512);
+  vsnprintf(v->data.err, 511, fmt, va);
 
-  v->err = realloc(v->err, strlen(v->err) + 1);
+  v->data.err = realloc(v->data.err, strlen(v->data.err) + 1);
 
   va_end(va);
 
@@ -74,16 +74,16 @@ lval_t* lval_err(char* fmt, ...) {
 lval_t* lval_sym(char* sym) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_SYM;
-  v->sym  = malloc(strlen(sym) + 1);
-  strcpy(v->sym, sym);
+  v->data.sym  = malloc(strlen(sym) + 1);
+  strcpy(v->data.sym, sym);
 
   return v;
 }
 
 lval_t* lval_fun(lbuiltin func) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type    = LVAL_FUN;
-  v->builtin = func;
+  v->type              = LVAL_FUN;
+  v->data.func.builtin = func;
 
   return v;
 }
@@ -108,11 +108,11 @@ lval_t* lval_qexpr(void) {
 
 lval_t* lval_lambda(lval_t* formals, lval_t* body) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type    = LVAL_FUN;
-  v->builtin = NULL;
-  v->env     = lenv_new();
-  v->formals = formals;
-  v->body    = body;
+  v->type              = LVAL_FUN;
+  v->env               = lenv_new();
+  v->data.func.builtin = NULL;
+  v->data.func.formals = formals;
+  v->data.func.body    = body;
 
   return v;
 }
@@ -138,16 +138,16 @@ void lval_del(lval_t* v) {
       break;
 
     case LVAL_FUN:
-      if (!v->builtin) {
+      if (!v->data.func.builtin) {
         lenv_del(v->env);
-        lval_del(v->formals);
-        lval_del(v->body);
+        lval_del(v->data.func.formals);
+        lval_del(v->data.func.body);
       }
       break;
 
-    case LVAL_STR: free(v->str); break;
-    case LVAL_ERR: free(v->err); break;
-    case LVAL_SYM: free(v->sym); break;
+    case LVAL_STR: free(v->data.str); break;
+    case LVAL_ERR: free(v->data.err); break;
+    case LVAL_SYM: free(v->data.sym); break;
 
     case LVAL_SEXPR:
     case LVAL_QEXPR:
@@ -179,7 +179,7 @@ lval_t* lval_truthy(lval_t* v) {
       break;
 
     case LVAL_BOOL:
-      b = v->num;
+      b = v->data.num;
       break;
 
     default:
@@ -193,29 +193,30 @@ lval_t* lval_truthy(lval_t* v) {
 int lval_eq(lval_t* x, lval_t* y) {
   if ((x->type == LVAL_INT || x->type == LVAL_FLOAT)
     && (y->type == LVAL_INT || y->type == LVAL_FLOAT)) {
-    return (x->num == y->num);
+    return (x->data.num == y->data.num);
   } else if (x->type != y->type) {
     return 0;
   }
 
   switch (x->type) {
     case LVAL_BOOL:
-      return (x->num == y->num);
+      return (x->data.num == y->data.num);
 
     case LVAL_STR:
-      return (strcmp(x->str, y->str) == 0);
+      return (strcmp(x->data.str, y->data.str) == 0);
 
     case LVAL_ERR:
-      return (strcmp(x->err, y->err) == 0);
+      return (strcmp(x->data.err, y->data.err) == 0);
 
     case LVAL_SYM:
-      return (strcmp(x->sym, y->sym) == 0);
+      return (strcmp(x->data.sym, y->data.sym) == 0);
 
     case LVAL_FUN:
-      if (x->builtin || y->builtin) {
-        return (x->builtin == y->builtin);
+      if (x->data.func.builtin || y->data.func.builtin) {
+        return (x->data.func.builtin == y->data.func.builtin);
       } else {
-        return lval_eq(x->formals, y->formals) && lval_eq(x->body, y->body);
+        return lval_eq(x->data.func.formals, y->data.func.formals)
+            && lval_eq(x->data.func.body,    y->data.func.body);
       }
 
     case LVAL_SEXPR:
@@ -244,19 +245,19 @@ lval_t* lval_add(lval_t* v, lval_t* x) {
 }
 
 lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
-  if (f->builtin) return f->builtin(e, a);
+  if (f->data.func.builtin) return f->data.func.builtin(e, a);
 
   int given = a->count;
-  int total = f->formals->count;
+  int total = f->data.func.formals->count;
 
   while (a->count) {
-    if (f->formals->count == 0) {
+    if (f->data.func.formals->count == 0) {
       lval_del(a);
       lval_err("Function passed too many arguments. Expected %d, got %d.",
         total, given);
     }
 
-    lval_t* sym = lval_pop(f->formals, 0);
+    lval_t* sym = lval_pop(f->data.func.formals, 0);
     lval_t* val = lval_pop(a, 0);
 
     lenv_set(f->env, sym, val);
@@ -267,10 +268,10 @@ lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
 
   lval_del(a);
 
-  if (f->formals->count == 0) {
+  if (f->data.func.formals->count == 0) {
     f->env->parent = e;
 
-    return builtin_eval(f->env, lval_add(lval_sexpr(), lval_copy(f->body)));
+    return builtin_eval(f->env, lval_add(lval_sexpr(), lval_copy(f->data.func.body)));
   }
     
   return lval_copy(f);
@@ -394,8 +395,8 @@ void lval_expr_print(lval_t* v, char open, char close) {
 }
 
 void lval_str_print(lval_t* v) {
-  char* escaped = malloc(strlen(v->str) + 1);
-  strcpy(escaped, v->str);
+  char* escaped = malloc(strlen(v->data.str) + 1);
+  strcpy(escaped, v->data.str);
 
   escaped = mpcf_escape(escaped);
 
@@ -406,10 +407,10 @@ void lval_str_print(lval_t* v) {
 
 void lval_float_print(lval_t* v) {
   // ends in zero, print with a trailing zero
-  if (fmod(v->num, 1) == 0) {
-    printf("%.01lf", v->num);
+  if (fmod(v->data.num, 1) == 0) {
+    printf("%.01lf", v->data.num);
   } else {
-    printf("%g", v->num);
+    printf("%g", v->data.num);
   }
 }
 
@@ -429,31 +430,31 @@ void lval_table_print(lval_t* v) {
 void lval_print_r(lval_t* v, int root) {
   switch (v->type) {
     case LVAL_INT:
-      printf("%ld", (long int) v->num);
+      printf("%ld", (long int) v->data.num);
       break;
     case LVAL_FLOAT:
       lval_float_print(v);
       break;
     case LVAL_BOOL:
-      printf("%s", (v->num == 0) ? "false" : "true");
+      printf("%s", (v->data.num == 0) ? "false" : "true");
       break;
     case LVAL_STR:
       lval_str_print(v);
       break;
     case LVAL_ERR:
-      printf("Error: %s", v->err);
+      printf("Error: %s", v->data.err);
       break;
     case LVAL_SYM:
-      printf("%s", v->sym);
+      printf("%s", v->data.sym);
       break;
     case LVAL_FUN:
-      if (v->builtin) {
+      if (v->data.func.builtin) {
         printf("<builtin>");
       } else {
         printf("(lambda ");
-        lval_print(v->formals);
+        lval_print(v->data.func.formals);
         putchar(' ');
-        lval_print(v->body);
+        lval_print(v->data.func.body);
         putchar(')');
       }
       break;
@@ -539,16 +540,16 @@ lval_t* lval_copy(lval_t* v) {
     case LVAL_INT:
     case LVAL_FLOAT:
     case LVAL_BOOL:
-      x->num = v->num;
+      x->data.num = v->data.num;
       break;
     case LVAL_FUN:
-      if (v->builtin) {
-        x->builtin = v->builtin;
+      if (v->data.func.builtin) {
+        x->data.func.builtin = v->data.func.builtin;
       } else {
-        x->builtin = NULL;
-        x->env     = lenv_copy(v->env);
-        x->formals = lval_copy(v->formals);
-        x->body    = lval_copy(v->body);
+        x->env               = lenv_copy(v->env);
+        x->data.func.builtin = NULL;
+        x->data.func.formals = lval_copy(v->data.func.formals);
+        x->data.func.body    = lval_copy(v->data.func.body);
       }
       break;
 
@@ -557,18 +558,18 @@ lval_t* lval_copy(lval_t* v) {
       break;
 
     case LVAL_STR:
-      x->str = malloc(strlen(v->str) + 1);
-      strcpy(x->str, v->str);
+      x->data.str = malloc(strlen(v->data.str) + 1);
+      strcpy(x->data.str, v->data.str);
       break;
 
     case LVAL_ERR:
-      x->err = malloc(strlen(v->err) + 1);
-      strcpy(x->err, v->err);
+      x->data.err = malloc(strlen(v->data.err) + 1);
+      strcpy(x->data.err, v->data.err);
       break;
 
     case LVAL_SYM:
-      x->sym = malloc(strlen(v->sym) + 1);
-      strcpy(x->sym, v->sym);
+      x->data.sym = malloc(strlen(v->data.sym) + 1);
+      strcpy(x->data.sym, v->data.sym);
       break;
 
     case LVAL_SEXPR:

@@ -31,9 +31,9 @@ lval_t* builtin_concat(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("concat", a, 0, LVAL_STR);
   LASSERT_ARG_TYPE("concat", a, 1, LVAL_STR);
 
-  char* str = malloc(strlen(a->cell[0]->str) + strlen(a->cell[1]->str) + 1);
-  strcpy(str, a->cell[0]->str);
-  strcat(str, a->cell[1]->str);
+  char* str = malloc(strlen(a->cell[0]->data.str) + strlen(a->cell[1]->data.str) + 1);
+  strcpy(str, a->cell[0]->data.str);
+  strcat(str, a->cell[1]->data.str);
 
   lval_del(a);
   return lval_str(str);
@@ -50,13 +50,13 @@ lval_t* builtin_substr(lenv_t* e, lval_t* a) {
 
   LASSERT_ARG_TYPE("substr", a, 1, LVAL_NUM);
 
-  int length = strlen(a->cell[0]->str);
-  int start  = a->cell[1]->num;
+  int length = strlen(a->cell[0]->data.str);
+  int start  = a->cell[1]->data.num;
   int end;
 
   if (a->count > 2) {
     LASSERT_ARG_TYPE("substr", a, 2, LVAL_NUM);
-    end = a->cell[2]->num;
+    end = a->cell[2]->data.num;
   } else {
     end = length - 1;
   }
@@ -77,7 +77,7 @@ lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   }
 
   char* newString = malloc(end - start + 1);
-  strncpy(newString, &a->cell[0]->str[start], end - start);
+  strncpy(newString, &a->cell[0]->data.str[start], end - start);
   newString[end - start] = '\0';
   
   lval_t* x = lval_str(newString);
@@ -92,7 +92,7 @@ lval_t* builtin_tosym(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("tosym", a, 1);
   LASSERT_ARG_TYPE("tosym", a, 0, LVAL_STR);
 
-  lval_t* x = lval_sym(a->cell[0]->str);
+  lval_t* x = lval_sym(a->cell[0]->data.str);
   lval_del(a);
 
   return x;
@@ -110,38 +110,38 @@ lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
 
   // If sub with no args, perform negation.
   if (strcmp(op, "-") == 0 && a->count == 0)
-    x->num = -x->num;
+    x->data.num = -x->data.num;
 
   if (strcmp(op, "+") == 0 && a->count == 0)
-    x->num = (x->num < 0) ? -x->num : x->num;
+    x->data.num = (x->data.num < 0) ? -x->data.num : x->data.num;
 
   while (a->count > 0) {
     lval_t* y = lval_pop(a, 0);
 
     if (strcmp(op, "+") == 0)
-      x->num += y->num;
+      x->data.num += y->data.num;
     if (strcmp(op, "-") == 0)
-      x->num -= y->num;
+      x->data.num -= y->data.num;
     if (strcmp(op, "*") == 0)
-      x->num *= y->num;
+      x->data.num *= y->data.num;
 
     if (strcmp(op, "%") == 0) {
-      if (y->num == 0) {
+      if (y->data.num == 0) {
         lval_del(x);
         lval_del(y);
         return lval_err("Division by zero.");
       } else {
-        x->num = fmod(x->num, y->num);
+        x->data.num = fmod(x->data.num, y->data.num);
       }
     }
 
     if (strcmp(op, "/") == 0) {
-      if (y->num == 0) {
+      if (y->data.num == 0) {
         lval_del(x);
         lval_del(y);
         return lval_err("Division by zero.");
       } else {
-        x->num /= y->num;
+        x->data.num /= y->data.num;
       }
     }
 
@@ -151,7 +151,7 @@ lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
   lval_del(a);
 
   // if we have a remainder, convert int to float
-  if (x->type == LVAL_INT && (fmod(x->num, 1) > 0))
+  if (x->type == LVAL_INT && (fmod(x->data.num, 1) > 0))
     x->type = LVAL_FLOAT;
 
   return x;
@@ -168,7 +168,7 @@ lval_t* builtin_not(lenv_t* e, lval_t* a) {
 
   lval_t* x = lval_truthy(a->cell[0]);
 
-  x->num = !x->num;
+  x->data.num = !x->data.num;
 
   lval_del(a);
   return x;
@@ -194,7 +194,7 @@ lval_t* builtin_if(lenv_t* e, lval_t* a) {
   a->cell[1]->type = LVAL_SEXPR;
   a->cell[2]->type = LVAL_SEXPR;
 
-  if (a->cell[0]->num != 0) {
+  if (a->cell[0]->data.num != 0) {
     x = lval_eval(e, lval_pop(a, 1));
   } else {
     x = lval_eval(e, lval_pop(a, 2));
@@ -210,10 +210,10 @@ lval_t* builtin_ord(lenv_t* e, lval_t* a, char* op) {
   LASSERT_ARG_TYPE("ord?", a, 1, LVAL_NUM);
 
   int r;
-  if (strcmp(op, ">")  == 0) { r = (a->cell[0]->num >  a->cell[1]->num); }
-  if (strcmp(op, "<")  == 0) { r = (a->cell[0]->num <  a->cell[1]->num); }
-  if (strcmp(op, ">=") == 0) { r = (a->cell[0]->num >= a->cell[1]->num); }
-  if (strcmp(op, "<=") == 0) { r = (a->cell[0]->num <= a->cell[1]->num); }
+  if (strcmp(op, ">")  == 0) { r = (a->cell[0]->data.num >  a->cell[1]->data.num); }
+  if (strcmp(op, "<")  == 0) { r = (a->cell[0]->data.num <  a->cell[1]->data.num); }
+  if (strcmp(op, ">=") == 0) { r = (a->cell[0]->data.num >= a->cell[1]->data.num); }
+  if (strcmp(op, "<=") == 0) { r = (a->cell[0]->data.num <= a->cell[1]->data.num); }
 
   lval_del(a);
 
@@ -247,7 +247,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
   // If given a bool to specify loading from path...
   if (a->count > 1) {
     LASSERT_ARG_TYPE("load", a, 1, LVAL_BOOL);
-    usePath = a->cell[1]->num;
+    usePath = a->cell[1]->data.num;
   }
 
   char* dir;
@@ -257,9 +257,9 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
     dir = "";
   }
 
-  char* path = malloc(strlen(dir) + strlen(a->cell[0]->str) + 1);
+  char* path = malloc(strlen(dir) + strlen(a->cell[0]->data.str) + 1);
   strcpy(path, dir);
-  strcat(path, a->cell[0]->str);
+  strcat(path, a->cell[0]->data.str);
 
   mpc_result_t r;
   if (mpc_parse_contents(path, Lish, &r)) {
@@ -331,7 +331,7 @@ lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPES("nth", a, 0, (LVAL_QEXPR | LVAL_STR));
   LASSERT_ARG_TYPE("nth", a, 1, LVAL_NUM); 
 
-  long id = a->cell[1]->num;
+  long id = a->cell[1]->data.num;
 
   if (id < 0)
     return lval_err("Cannot access negative index %ld", id);
@@ -352,11 +352,11 @@ lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   }
 
   // otherwise, its gotta be a string, right?
-  if (strlen(a->cell[0]->str)-1 < id)
+  if (strlen(a->cell[0]->data.str)-1 < id)
     return lval_qexpr();
 
   char* str = malloc(2);
-  strncpy(str, a->cell[0]->str + id, 1);
+  strncpy(str, a->cell[0]->data.str + id, 1);
   str[1] = '\0';
   lval_t* x = lval_str(str);
   free(str);
@@ -414,7 +414,7 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
   if (a->cell[0]->type == LVAL_QEXPR)
     x = lval_int(a->cell[0]->count);
   if (a->cell[0]->type == LVAL_STR)
-    x = lval_int(strlen(a->cell[0]->str));
+    x = lval_int(strlen(a->cell[0]->data.str));
   if (a->cell[0]->type == LVAL_TABLE)
     x = lval_int(a->cell[0]->env->count);
 
@@ -455,7 +455,7 @@ lval_t* builtin_puts(lenv_t* e, lval_t* v) {
 
   // Strings need to be handled differently so they aren't escaped.
   if (v->cell[0]->type == LVAL_STR) {
-    printf("%s\n", v->cell[0]->str);
+    printf("%s\n", v->cell[0]->data.str);
   } else {
     lval_println(v);
   }
