@@ -29,27 +29,36 @@ char* ltype_name(int);
 struct lval_t {
   int type;
 
-  union {  
+  union {
+    // int, float, bool
     double   num;
+    // string
     char*    str;
+    // error
     char*    err;
 
+    // symbol, literal or otherwise
     struct {
       char* name;
       int   lit;
     } sym;
 
+    // lambda and builtin
     struct {
       lbuiltin builtin;
       lval_t*  formals;
       lval_t*  body;
     } func;
+
+    // sexpr, qexpr
+    struct {
+      int             count;
+      struct lval_t** cell;
+    } expr;
+
   } data;
 
   lenv_t*  env;
-
-  int             count;
-  struct lval_t** cell;
 };
 
 lval_t* lval_int(long int);
