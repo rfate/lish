@@ -29,8 +29,7 @@ lenv_t* lenv_copy(lenv_t* e) {
   n->syms = malloc(sizeof(char*)   * n->count);
   n->vals = malloc(sizeof(lval_t*) * n->count);
 
-  for (int i = 0; i < e->count; ++i)
-  {
+  for (int i = 0; i < e->count; ++i) {
     n->syms[i] = malloc(strlen(e->syms[i]) + 1);
     strcpy(n->syms[i], e->syms[i]);
     n->vals[i] = lval_copy(e->vals[i]);
@@ -47,9 +46,8 @@ lval_t* lenv_get(lenv_t* e, lval_t* k) {
       return lval_copy(e->vals[i]);
   }
 
-  if (e->parent) {
+  if (e->parent)
     return lenv_get(e->parent, k);
-  }
 
   return lval_err("Unbound symbol \"%s\".", key);
 }
@@ -66,7 +64,6 @@ void lenv_set(lenv_t* e, lval_t* k, lval_t* v) {
   char* key = (k->type == LVAL_STR) ? k->data.str : k->data.sym;
 
   for (int i = 0; i < e->count; ++i) {
-
     if (strcmp(e->syms[i], key) == 0) {
       lval_del(e->vals[i]);
       e->vals[i] = lval_copy(v);

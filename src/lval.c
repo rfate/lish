@@ -23,32 +23,32 @@ char* ltype_name(int t) {
 /// Constructors
 lval_t* lval_int(long int x) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_INT;
-  v->data.num  = x;
+  v->type     = LVAL_INT;
+  v->data.num = x;
 
   return v;
 }
 
 lval_t* lval_float(double x) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_FLOAT;
-  v->data.num  = x;
+  v->type     = LVAL_FLOAT;
+  v->data.num = x;
 
   return v;
 }
 
 lval_t* lval_bool(int x) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_BOOL;
-  v->data.num  = (x != 0);
+  v->type     = LVAL_BOOL;
+  v->data.num = (x != 0);
 
   return v;
 }
 
 lval_t* lval_str(char* str) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_STR;
-  v->data.str  = malloc(strlen(str) + 1);
+  v->type     = LVAL_STR;
+  v->data.str = malloc(strlen(str) + 1);
   strcpy(v->data.str, str);
   
   return v;
@@ -73,8 +73,8 @@ lval_t* lval_err(char* fmt, ...) {
 
 lval_t* lval_sym(char* sym) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_SYM;
-  v->data.sym  = malloc(strlen(sym) + 1);
+  v->type     = LVAL_SYM;
+  v->data.sym = malloc(strlen(sym) + 1);
   strcpy(v->data.sym, sym);
 
   return v;
@@ -120,7 +120,7 @@ lval_t* lval_lambda(lval_t* formals, lval_t* body) {
 lval_t* lval_table(void) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type = LVAL_TABLE;
-  v->env = lenv_new();
+  v->env  = lenv_new();
 
   return v;
 }
@@ -192,7 +192,7 @@ lval_t* lval_truthy(lval_t* v) {
 
 int lval_eq(lval_t* x, lval_t* y) {
   if ((x->type == LVAL_INT || x->type == LVAL_FLOAT)
-    && (y->type == LVAL_INT || y->type == LVAL_FLOAT)) {
+   && (y->type == LVAL_INT || y->type == LVAL_FLOAT)) {
     return (x->data.num == y->data.num);
   } else if (x->type != y->type) {
     return 0;
@@ -245,7 +245,8 @@ lval_t* lval_add(lval_t* v, lval_t* x) {
 }
 
 lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
-  if (f->data.func.builtin) return f->data.func.builtin(e, a);
+  if (f->data.func.builtin)
+    return f->data.func.builtin(e, a);
 
   int given = a->count;
   int total = f->data.func.formals->count;
@@ -415,7 +416,7 @@ void lval_float_print(lval_t* v) {
 }
 
 void lval_table_print(lval_t* v) {
-  printf("[");
+  putchar('[');
 
   for (int i = 0; i < v->env->count; ++i) {
     if (i > 0) { printf(","); }
@@ -424,7 +425,7 @@ void lval_table_print(lval_t* v) {
     lval_print(v->env->vals[i]);
   }
 
-  printf(" ]");
+  puts(" ]");
 }
 
 void lval_print_r(lval_t* v, int root) {

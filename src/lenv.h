@@ -19,7 +19,7 @@ lval_t* lenv_get(lenv_t*, lval_t*);
 void    lenv_def(lenv_t*, lval_t*, lval_t*);
 void    lenv_set(lenv_t*, lval_t*, lval_t*);
 
-void lenv_add_builtin(lenv_t*, char*, lbuiltin);
-void lenv_add_builtins(lenv_t* e);
+void    lenv_add_builtin(lenv_t*, char*, lbuiltin);
+void    lenv_add_builtins(lenv_t* e);
 
 #endif
