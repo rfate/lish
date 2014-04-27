@@ -112,6 +112,7 @@ void lenv_add_builtins(lenv_t* e) {
   // string
   lenv_add_builtin(e, "substr", builtin_substr);
   lenv_add_builtin(e, "tosym",  builtin_tosym);
+  lenv_add_builtin(e, "concat", builtin_concat);
 
   // vars
   lenv_add_builtin(e, "def",    builtin_set);

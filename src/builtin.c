@@ -26,6 +26,19 @@ lval_t* builtin_type(lenv_t* e, lval_t* a) {
   return x;
 }
 
+lval_t* builtin_concat(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("concat", a, 2);
+  LASSERT_ARG_TYPE("concat", a, 0, LVAL_STR);
+  LASSERT_ARG_TYPE("concat", a, 1, LVAL_STR);
+
+  char* str = malloc(strlen(a->cell[0]->str) + strlen(a->cell[1]->str) + 1);
+  strcpy(str, a->cell[0]->str);
+  strcat(str, a->cell[1]->str);
+
+  lval_del(a);
+  return lval_str(str);
+}
+
 // This fucking blows.
 lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("substr", a, 0, LVAL_STR);
