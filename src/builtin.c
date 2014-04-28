@@ -3,6 +3,19 @@
 #include "lenv.h"
 #include "parser.h"
 
+lval_t* builtin_deref(lenv_t* e, lval_t* a) {
+  LASSERT_ARG_COUNT("deref", a, 1);
+  LASSERT_ARG_TYPE("deref", a, 0, LVAL_SYM);
+  
+  lval_t* x = a->data.expr.cell[0];
+  x->data.sym.lit = 0;
+
+  lval_t* y = lval_copy(lenv_get(e, x));
+  lval_del(a);
+
+  return y;
+}
+
 lval_t* builtin_el(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("el", a, 2);
   LASSERT_ARG_TYPE("el", a, 0, LVAL_TABLE);

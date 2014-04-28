@@ -35,6 +35,9 @@ char* ltype_name(int);
 
 lval_t* builtin_type(lenv_t*, lval_t*);
 
+// symbols
+lval_t* builtin_deref(lenv_t*, lval_t*);
+
 // list handling
 lval_t* builtin_eval(lenv_t*, lval_t*);
 lval_t* builtin_head(lenv_t*, lval_t*);
