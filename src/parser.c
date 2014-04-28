@@ -19,7 +19,7 @@ void parser_init(void) {
 
   mpca_lang(MPC_LANG_DEFAULT,
     "                                                            \
-      tablekey : <symbol> | <string>                            ;\
+      tablekey : <symbol> | <string> | <litsymbol>              ;\
       tablepair: <tablekey> \"=\" <expr>                        ;\
       table    : '[' <tablepair>+ (/, */ <tablepair>)* ']'      ;\
                                                                  \

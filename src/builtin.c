@@ -265,7 +265,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
 
   char* dir;
   if (usePath) {
-    dir = "/usr/local/lib/lish/" LISH_MAJOR "." LISH_MINOR "/";
+    dir = LISH_INSTALL_PATH;
   } else {
     dir = "";
   }
