@@ -8,10 +8,11 @@ typedef struct lenv_t lenv_t;
 
 char* ltype_name(int);
 
-#define LASSERT(args, cond, fmt, ...)    \
-  if (!(cond)) {                         \
-    lval_del(args);                      \
-    return lval_err(fmt, ##__VA_ARGS__); \
+#define LASSERT(args, cond, fmt, ...)           \
+  if (!(cond)) {                                \
+    lval_t* err = lval_err(fmt, ##__VA_ARGS__); \
+    lval_del(args);                             \
+    return err;                                 \
   }
 
 #define LASSERT_ARG_COUNT(name, args, c) \
