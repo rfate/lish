@@ -9,7 +9,7 @@ lish_t* lish_new(void) {
   in->env = lenv_new();
   lenv_add_builtins(in->env);
 
-  lish_load_file(in, "lib/core.lish", 1);
+  lish_load_file(in, "lib/core.lish", !LISH_LOCAL_LIBS);
 
   return in;
 }
