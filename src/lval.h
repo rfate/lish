@@ -64,14 +64,11 @@ struct lval_t {
 lval_t* lval_int(long int);
 lval_t* lval_float(double);
 lval_t* lval_bool(int);
-lval_t* lval_str(char*);
 lval_t* lval_err(char*, ...);
 lval_t* lval_sym(char*, int);
 lval_t* lval_fun(lbuiltin);
 lval_t* lval_sexpr(void);
-lval_t* lval_qexpr(void);
 lval_t* lval_lambda(lval_t*, lval_t*);
-lval_t* lval_table(void);
 
 void    lval_del(lval_t*);
 lval_t* lval_copy(lval_t*);
@@ -94,4 +91,9 @@ lval_t* lval_take(lval_t*, int);
 lval_t* lval_eval      (lenv_t*, lval_t*);
 lval_t* lval_eval_sexpr(lenv_t*, lval_t*);
 
+
+// types
+#include "types/table.h"
+#include "types/str.h"
+#include "types/qexpr.h"
 #endif

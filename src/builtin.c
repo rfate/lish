@@ -347,57 +347,26 @@ lval_t* builtin_list(lenv_t* e, lval_t* a) {
  */
 lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("nth", a, 2);
- 
   LASSERT_ARG_ITERABLE("nth", a, 0);
   LASSERT_ARG_IS_NUM("nth", a, 1);
 
-  long id = a->data.expr.cell[1]->data.num;
 
-  if (a->data.expr.cell[0]->type == LVAL_TABLE) {
-    lval_t* x;
-    int length = a->data.expr.cell[0]->env->count;
+  if (a->data.expr.cell[0]->type == LVAL_TABLE)
+    return lval_table_nth(a);
 
-    if (id >= length || id < 0) {
-      x = lval_err("nth index %d out of bounds.", id);
-    } else {
-      x = lval_copy(a->data.expr.cell[0]->env->vals[id]);
-    }
+  if (a->data.expr.cell[0]->type == LVAL_QEXPR)
+    return lval_qexpr_nth(a);
 
-    lval_del(a);
-    return x;
-  }
+  if (a->data.expr.cell[0]->type == LVAL_STR)
+    return lval_str_nth(a);
 
-  if (id < 0) {
-    lval_del(a);
-    return lval_err("Cannot access negative index %ld", id);
-  }
+  // This should never be possible.
+  lval_t* x = lval_err("nth reached of body. this shouldn't happen. type: %s",
+    ltype_name(a->data.expr.cell[0]->type));
 
-  if (a->data.expr.cell[0]->type == LVAL_QEXPR) {
- 
-    if (a->data.expr.cell[0]->data.expr.count-1 < id)
-      return lval_qexpr();
-
-    lval_t* v = lval_take(a, 0);
-    lval_t* x = lval_pop(v, id);
-
-    lval_del(v);
-    lval_del(a);
-
-    return x;
-  }
-
-  // otherwise, its gotta be a string, right?
-  if (strlen(a->data.expr.cell[0]->data.str)-1 < id)
-    return lval_qexpr();
-
-  char* str = malloc(2);
-  strncpy(str, a->data.expr.cell[0]->data.str + id, 1);
-  str[1] = '\0';
-  lval_t* x = lval_str(str);
-  free(str);
   lval_del(a);
-
   return x;
+
 }
 
 lval_t* builtin_map(lenv_t* e, lval_t* a) {

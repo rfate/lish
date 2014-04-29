@@ -44,14 +44,6 @@ lval_t* lval_bool(int x) {
   return v;
 }
 
-lval_t* lval_str(char* str) {
-  lval_t* v = malloc(sizeof(lval_t));
-  v->type     = LVAL_STR;
-  v->data.str = malloc(strlen(str) + 1);
-  strcpy(v->data.str, str);
-  
-  return v;
-}
 
 lval_t* lval_err(char* fmt, ...) {
   lval_t* v = malloc(sizeof(lval_t));
@@ -97,15 +89,6 @@ lval_t* lval_sexpr(void) {
   return v;
 }
 
-lval_t* lval_qexpr(void) {
-  lval_t* v = malloc(sizeof(lval_t));
-  v->type            = LVAL_QEXPR;
-  v->data.expr.count = 0;
-  v->data.expr.cell  = NULL;
-
-  return v;
-}
-
 lval_t* lval_lambda(lval_t* formals, lval_t* body) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type              = LVAL_FUN;
@@ -113,14 +96,6 @@ lval_t* lval_lambda(lval_t* formals, lval_t* body) {
   v->data.func.builtin = NULL;
   v->data.func.formals = formals;
   v->data.func.body    = body;
-
-  return v;
-}
-
-lval_t* lval_table(void) {
-  lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_TABLE;
-  v->env  = lenv_new();
 
   return v;
 }
@@ -399,17 +374,6 @@ void lval_expr_print(lval_t* v, char open, char close) {
   putchar(close);
 }
 
-void lval_str_print(lval_t* v) {
-  char* escaped = malloc(strlen(v->data.str) + 1);
-  strcpy(escaped, v->data.str);
-
-  escaped = mpcf_escape(escaped);
-
-  printf("\"%s\"", escaped);
-
-  free(escaped);
-}
-
 void lval_float_print(lval_t* v) {
   // ends in zero, print with a trailing zero
   if (fmod(v->data.num, 1) == 0) {
@@ -417,19 +381,6 @@ void lval_float_print(lval_t* v) {
   } else {
     printf("%g", v->data.num);
   }
-}
-
-void lval_table_print(lval_t* v) {
-  putchar('[');
-
-  for (int i = 0; i < v->env->count; ++i) {
-    if (i > 0) { printf(","); }
-
-    printf(" %s = ", v->env->syms[i]);
-    lval_print(v->env->vals[i]);
-  }
-
-  puts(" ]");
 }
 
 void lval_print_r(lval_t* v, int root) {

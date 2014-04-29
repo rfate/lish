@@ -19,10 +19,13 @@ CC=clang
 CFLAGS=-c -std=c11 -Wall $(CDEFINES)
 LDFLAGS=-lm
 
-SOURCES=$(wildcard $(SOURCE_DIR)/*.c)
+sourcesubdirs=$(shell find src -type d | grep -v "src$$" | awk '{gsub("src/","bin/",$$1); print $$1}'|xargs)
+rwildcard=$(foreach d, $(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+
+SOURCES=$(call rwildcard, $(SOURCE_DIR)/, *.c)
 OBJECTS=$(SOURCES:$(SOURCE_DIR)/%.c=$(OBJECT_DIR)/%.o)
 
-all: $(SOURCES) $(EXECUTABLE)
+all: build_bin_structure $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
@@ -30,9 +33,13 @@ $(EXECUTABLE): $(OBJECTS)
 $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c
 	$(CC) $(CFLAGS) $< -o $@
 
+build_bin_structure:
+	@mkdir -p $(sourcesubdirs)
+
 clean:
-	rm -f $(OBJECT_DIR)/*.o
-	rm -f $(EXECUTABLE)
+	@echo "Cleaning project..."
+	@rm -rf $(OBJECT_DIR)
+	@rm -f $(EXECUTABLE)
 
 install: all
 	cp $(EXECUTABLE) /usr/local/bin
