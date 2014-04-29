@@ -1,8 +1,5 @@
 EXECUTABLE=lish
 
-SOURCE_DIR=src
-OBJECT_DIR=bin
-
 LISH_MAJOR=0
 LISH_MINOR=2
 LISH_PATCH=1
@@ -22,15 +19,15 @@ LDFLAGS=-lm
 sourcesubdirs=$(shell find src -type d | grep -v "src$$" | awk '{gsub("src/","bin/",$$1); print $$1}'|xargs)
 rwildcard=$(foreach d, $(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
-SOURCES=$(call rwildcard, $(SOURCE_DIR)/, *.c)
-OBJECTS=$(SOURCES:$(SOURCE_DIR)/%.c=$(OBJECT_DIR)/%.o)
+SOURCES=$(call rwildcard, src/, *.c)
+OBJECTS=$(SOURCES:src/%.c=bin/%.o)
 
 all: build_bin_structure $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
-$(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c
+bin/%.o: src/%.c
 	$(CC) $(CFLAGS) $< -o $@
 
 build_bin_structure:
