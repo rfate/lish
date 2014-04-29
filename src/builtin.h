@@ -36,6 +36,13 @@ char* ltype_name(int);
           "Builtin \"%s\" expected arg %d to be Number, got %s.",         \
           name, (index+1), ltype_name(args->data.expr.cell[index]->type))
 
+#define LASSERT_ARG_ITERABLE(name, args, index)                                  \
+  LASSERT(args, (args->data.expr.cell[index]->type == LVAL_QEXPR                 \
+              || args->data.expr.cell[index]->type == LVAL_STR                   \
+              || args->data.expr.cell[index]->type == LVAL_TABLE),               \
+    "Builtin \"%s\" expected arg %d of type %s to have length. Accepted types: " \
+    "Q-Expression, String, Table",                                               \
+     name, (index+1), ltype_name(args->data.expr.cell[index]->type));
 
 lval_t* builtin_type(lenv_t*, lval_t*);
 

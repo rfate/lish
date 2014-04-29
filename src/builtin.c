@@ -20,13 +20,17 @@ lval_t* builtin_el(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("el", a, 2);
   LASSERT_ARG_TYPE("el", a, 0, LVAL_TABLE);
 
+  lval_t* x;
+
   if (a->data.expr.cell[1]->type != LVAL_STR && a->data.expr.cell[1]->type != LVAL_SYM) {
-    lval_del(a);
-    return lval_err("Builtin \"el\" cannot access index of non-index type %d",
+    x = lval_err("Builtin \"el\" cannot access index of non-index type %s",
       ltype_name(a->data.expr.cell[1]->type));
+  } else {
+    x = lenv_get(a->data.expr.cell[0]->env, a->data.expr.cell[1]);
   }
 
-  return lenv_get(a->data.expr.cell[0]->env, a->data.expr.cell[1]);
+  lval_del(a);
+  return x;
 }
 
 lval_t* builtin_type(lenv_t* e, lval_t* a) {
@@ -337,24 +341,36 @@ lval_t* builtin_list(lenv_t* e, lval_t* a) {
 }
 
 /*
- * (nth {42 64 32} 1)  => 64
- * (nth {42 64 32} 12) => {}
+ * (nth {42 64 32} 1)       => 64
+ * (nth {42 64 32} 12)      => {}
+ * (nth [x=4, y=9, z=12] 2) => 9
  */
 lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("nth", a, 2);
  
-  LASSERT(a, (a->data.expr.cell[0]->type == LVAL_QEXPR
-           || a->data.expr.cell[0]->type == LVAL_STR),
-          "Builtin \"nth\" given incorrect type \"%s\"",
-          ltype_name(a->data.expr.cell[0]->type));
-
+  LASSERT_ARG_ITERABLE("nth", a, 0);
   LASSERT_ARG_IS_NUM("nth", a, 1);
 
   long id = a->data.expr.cell[1]->data.num;
 
-  if (id < 0)
-    return lval_err("Cannot access negative index %ld", id);
+  if (a->data.expr.cell[0]->type == LVAL_TABLE) {
+    lval_t* x;
+    int length = a->data.expr.cell[0]->env->count;
 
+    if (id >= length || id < 0) {
+      x = lval_err("nth index %d out of bounds.", id);
+    } else {
+      x = lval_copy(a->data.expr.cell[0]->env->vals[id]);
+    }
+
+    lval_del(a);
+    return x;
+  }
+
+  if (id < 0) {
+    lval_del(a);
+    return lval_err("Cannot access negative index %ld", id);
+  }
 
   if (a->data.expr.cell[0]->type == LVAL_QEXPR) {
  
@@ -426,11 +442,7 @@ lval_t* builtin_join(lenv_t* e, lval_t* a) {
 
 lval_t* builtin_len(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("len", a, 1);
-  LASSERT(a, (a->data.expr.cell[0]->type == LVAL_QEXPR
-           || a->data.expr.cell[0]->type == LVAL_STR
-           || a->data.expr.cell[0]->type == LVAL_TABLE),
-          "Builtin \"len\" given incorrect type \"%s\".",
-          ltype_name(a->data.expr.cell[0]->type));
+  LASSERT_ARG_ITERABLE("len", a, 0);
     
   lval_t* x;
 
