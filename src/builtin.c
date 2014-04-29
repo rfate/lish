@@ -61,14 +61,14 @@ lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   if (a->data.expr.count == 1)
     return a->data.expr.cell[0];
 
-  LASSERT_ARG_TYPE("substr", a, 1, LVAL_NUM);
+  LASSERT_ARG_IS_NUM("substr", a, 1);
 
   int length = strlen(a->data.expr.cell[0]->data.str);
   int start  = a->data.expr.cell[1]->data.num;
   int end;
 
   if (a->data.expr.count > 2) {
-    LASSERT_ARG_TYPE("substr", a, 2, LVAL_NUM);
+    LASSERT_ARG_IS_NUM("substr", a, 2);
     end = a->data.expr.cell[2]->data.num;
   } else {
     end = length - 1;
@@ -112,13 +112,10 @@ lval_t* builtin_tosym(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
-  for (int i = 0; i < a->data.expr.count; ++i)
-  {
-    if ((a->data.expr.cell[i]->type & LVAL_NUM) != a->data.expr.cell[i]->type) {
-      lval_del(a);
-      return lval_err("Cannot operate on non-number.");
-    }
+  for (int i = 0; i < a->data.expr.count; ++i) {
+    LASSERT_ARG_IS_NUM(op, a, i);
   }
+
   lval_t* x = lval_pop(a, 0);
 
   // If sub with no args, perform negation.
@@ -218,9 +215,9 @@ lval_t* builtin_if(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_ord(lenv_t* e, lval_t* a, char* op) {
-  LASSERT_ARG_COUNT("ord?", a, 2);
-  LASSERT_ARG_TYPE("ord?", a, 0, LVAL_NUM);
-  LASSERT_ARG_TYPE("ord?", a, 1, LVAL_NUM);
+  LASSERT_ARG_COUNT(op, a, 2);
+  LASSERT_ARG_IS_NUM(op, a, 0);
+  LASSERT_ARG_IS_NUM(op, a, 1);
 
   int r;
   if (strcmp(op, ">")  == 0) { r = (a->data.expr.cell[0]->data.num >  a->data.expr.cell[1]->data.num); }
@@ -239,7 +236,7 @@ lval_t* builtin_ge(lenv_t* e, lval_t* a) { return builtin_ord(e, a, ">="); }
 lval_t* builtin_le(lenv_t* e, lval_t* a) { return builtin_ord(e, a, "<="); }
 
 lval_t* builtin_cmp(lenv_t* e, lval_t* a, char* op) {
-  LASSERT_ARG_COUNT("cmp???", a, 2);
+  LASSERT_ARG_COUNT(op, a, 2);
 
   int r;
   if (strcmp(op, "==") == 0) { r =  lval_eq(a->data.expr.cell[0], a->data.expr.cell[1]); }
@@ -345,8 +342,13 @@ lval_t* builtin_list(lenv_t* e, lval_t* a) {
  */
 lval_t* builtin_nth(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("nth", a, 2);
-  LASSERT_ARG_TYPES("nth", a, 0, (LVAL_QEXPR | LVAL_STR));
-  LASSERT_ARG_TYPE("nth", a, 1, LVAL_NUM); 
+ 
+  LASSERT(a, (a->data.expr.cell[0]->type == LVAL_QEXPR
+           || a->data.expr.cell[0]->type == LVAL_STR),
+          "Builtin \"nth\" given incorrect type \"%s\"",
+          ltype_name(a->data.expr.cell[0]->type));
+
+  LASSERT_ARG_IS_NUM("nth", a, 1);
 
   long id = a->data.expr.cell[1]->data.num;
 
@@ -424,8 +426,12 @@ lval_t* builtin_join(lenv_t* e, lval_t* a) {
 
 lval_t* builtin_len(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("len", a, 1);
-  LASSERT_ARG_TYPES("len", a, 0, (LVAL_QEXPR | LVAL_STR | LVAL_TABLE));
-
+  LASSERT(a, (a->data.expr.cell[0]->type == LVAL_QEXPR
+           || a->data.expr.cell[0]->type == LVAL_STR
+           || a->data.expr.cell[0]->type == LVAL_TABLE),
+          "Builtin \"len\" given incorrect type \"%s\".",
+          ltype_name(a->data.expr.cell[0]->type));
+    
   lval_t* x;
 
   if (a->data.expr.cell[0]->type == LVAL_QEXPR)
@@ -441,12 +447,12 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_var(lenv_t* e, lval_t* a, char* func) {
-  LASSERT_ARG_COUNT("var??", a, 2);
-  LASSERT_ARG_TYPE("var??", a, 0, LVAL_SYM);
+  LASSERT_ARG_COUNT(func, a, 2);
+  LASSERT_ARG_TYPE(func, a, 0, LVAL_SYM);
 
-  if (strcmp(func, "def") == 0)
+  if (strcmp(func, "=")   == 0)
     lenv_set(e, a->data.expr.cell[0], a->data.expr.cell[1]);
-  if (strcmp(func, "=") == 0)
+  if (strcmp(func, "def") == 0)
     lenv_def(e, a->data.expr.cell[0], a->data.expr.cell[1]);
 
   lval_del(a);
@@ -454,8 +460,8 @@ lval_t* builtin_var(lenv_t* e, lval_t* a, char* func) {
   return lval_sexpr();
 }
 
-lval_t* builtin_def(lenv_t* e, lval_t* v) { return builtin_var(e, v, "def"); }
-lval_t* builtin_set(lenv_t* e, lval_t* v) { return builtin_var(e, v, "=");   }
+lval_t* builtin_def(lenv_t* e, lval_t* v) { return builtin_var(e, v, "="); }
+lval_t* builtin_set(lenv_t* e, lval_t* v) { return builtin_var(e, v, "def");   }
 
 lval_t* builtin_puts(lenv_t* e, lval_t* v) {
   LASSERT_ARG_COUNT("puts", v, 1);

@@ -8,7 +8,6 @@ char* ltype_name(int t) {
     case LVAL_ERR:   return "Error";
     case LVAL_INT:   return "Integer";
     case LVAL_FLOAT: return "Float";
-    case LVAL_NUM:   return "Number";
     case LVAL_BOOL:  return "Boolean";
     case LVAL_STR:   return "String";
     case LVAL_SYM:   return "Symbol";

@@ -1,6 +1,7 @@
 #ifndef _LISH_LVAL_H
 #define _LISH_LVAL_H
 
+#include <stdint.h>
 #include "mpc.h"
 
 struct lval_t;
@@ -10,25 +11,23 @@ typedef struct lenv_t lenv_t;
 typedef lval_t*(*lbuiltin)(lenv_t*, lval_t*);
 
 enum {
-  LVAL_ERR   =   1,
-  LVAL_INT   =   2,
-  LVAL_FLOAT =   4,
-  LVAL_BOOL  =   8,
-  LVAL_STR   =  16,
-  LVAL_SYM   =  32,
-  LVAL_FUN   =  64,
-  LVAL_SEXPR = 128,
-  LVAL_QEXPR = 256,
-  LVAL_TABLE = 512,
-  // ORs
-  LVAL_NUM   = (LVAL_INT | LVAL_FLOAT),
+  LVAL_ERR,
+  LVAL_INT,
+  LVAL_FLOAT,
+  LVAL_BOOL,
+  LVAL_STR,
+  LVAL_SYM,
+  LVAL_FUN,
+  LVAL_SEXPR,
+  LVAL_QEXPR,
+  LVAL_TABLE,
 };
 
 char* ltype_name(int);
 
 #pragma pack(push, 1)
 struct lval_t {
-  int type;
+  uint8_t type;
 
   union {
     // int, float, bool
@@ -40,8 +39,8 @@ struct lval_t {
 
     // symbol, literal or otherwise
     struct {
-      char* name;
-      int   lit;
+      char*   name;
+      uint8_t lit;
     } sym;
 
     // lambda and builtin

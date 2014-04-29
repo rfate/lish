@@ -15,23 +15,26 @@ char* ltype_name(int);
     return err;                                 \
   }
 
-#define LASSERT_ARG_COUNT(name, args, c) \
-  LASSERT(args, args->data.expr.count == c,        \
-    "Builtin \"" name "\" given incorrect number of arguments. Expected %d, got %d", c, args->data.expr.count)
+#define LASSERT_ARG_COUNT(name, args, c)                                       \
+  LASSERT(args, args->data.expr.count == c,                                    \
+    "Builtin \"%s\" given incorrect number of arguments. Expected %d, got %d", \
+    name, c, args->data.expr.count)
 
-#define LASSERT_NONEMPTY_LIST(name, args, argn) \
-  LASSERT(args, args->data.expr.cell[argn]->data.expr.count != 0,   \
-    "Builtin \"" name "\" given empty list.")
+#define LASSERT_NONEMPTY_LIST(name, args, argn)                         \
+  LASSERT(args, args->data.expr.cell[argn]->data.expr.count != 0,       \
+    "Builtin \"%s\" given empty list for argument %d.", name, (argn+1))
 
-#define LASSERT_ARG_TYPE(name, args, index, mask)                            \
-  LASSERT(args, (mask & args->data.expr.cell[index]->type) == args->data.expr.cell[index]->type, \
-      "Builtin \"" name "\" expected arg %d to be of type %s, got %s.",      \
-          index, ltype_name(mask), ltype_name(args->data.expr.cell[index]->type));
+#define LASSERT_ARG_TYPE(name, args, index, _type)                \
+  LASSERT(args, args->data.expr.cell[index]->type == _type,       \
+      "Builtin \"%s\" expected arg %d to be of type %s, got %s.", \
+          name, (index+1), ltype_name(_type),                     \
+          ltype_name(args->data.expr.cell[index]->type))          \
 
-#define LASSERT_ARG_TYPES(name, args, index, mask)                             \
-  LASSERT(args, (mask & args->data.expr.cell[index]->type) == args->data.expr.cell[index]->type,   \
-    "Builtin \"" name "\" wasn't expecting type %s for arg %d.",               \
-    ltype_name(args->data.expr.cell[index]->type), index);
+#define LASSERT_ARG_IS_NUM(name, args, index)                             \
+  LASSERT(args, (args->data.expr.cell[index]->type == LVAL_INT            \
+              || args->data.expr.cell[index]->type == LVAL_FLOAT),        \
+          "Builtin \"%s\" expected arg %d to be Number, got %s.",         \
+          name, (index+1), ltype_name(args->data.expr.cell[index]->type))
 
 
 lval_t* builtin_type(lenv_t*, lval_t*);
