@@ -26,6 +26,7 @@ enum {
 
 char* ltype_name(int);
 
+#pragma pack(push, 1)
 struct lval_t {
   int type;
 
@@ -55,11 +56,11 @@ struct lval_t {
       int             count;
       struct lval_t** cell;
     } expr;
-
   } data;
 
   lenv_t*  env;
 };
+#pragma pack(pop)
 
 lval_t* lval_int(long int);
 lval_t* lval_float(double);
