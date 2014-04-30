@@ -10,6 +10,7 @@ void lval_table_print(lval_t*);
 // builtins
 
 lval_t* lval_table_nth(lval_t*);
+lval_t* lval_table_el(lval_t*);
 
 #endif
 

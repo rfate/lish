@@ -43,3 +43,19 @@ lval_t* lval_table_nth(lval_t* a) {
   return x;
 }
 
+lval_t* lval_table_el(lval_t* a) {
+  lval_t* x;
+
+  if (a->data.expr.cell[1]->type != LVAL_STR
+   && a->data.expr.cell[1]->type != LVAL_SYM) {
+    x = lval_err("Builtin \"el\" cannot access index of non-index type %s",
+      ltype_name(a->data.expr.cell[1]->type));
+  } else {
+    x = lenv_get(a->data.expr.cell[0]->env, a->data.expr.cell[1]);
+  }
+
+  lval_del(a);
+  return x;
+}
+
+

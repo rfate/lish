@@ -18,16 +18,13 @@ lval_t* builtin_deref(lenv_t* e, lval_t* a) {
 
 lval_t* builtin_el(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("el", a, 2);
-  LASSERT_ARG_TYPE("el", a, 0, LVAL_TABLE);
 
-  lval_t* x;
-
-  if (a->data.expr.cell[1]->type != LVAL_STR && a->data.expr.cell[1]->type != LVAL_SYM) {
-    x = lval_err("Builtin \"el\" cannot access index of non-index type %s",
-      ltype_name(a->data.expr.cell[1]->type));
-  } else {
-    x = lenv_get(a->data.expr.cell[0]->env, a->data.expr.cell[1]);
+  if (a->data.expr.cell[0]->type == LVAL_TABLE) {
+    return lval_table_el(a);
   }
+
+  lval_t* x = lval_err("No method \"el\" found for type %s.",
+    ltype_name(a->data.expr.cell[0]->type));
 
   lval_del(a);
   return x;

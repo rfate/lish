@@ -3,7 +3,7 @@ EXECUTABLE=lish
 LISH_MAJOR=0
 LISH_MINOR=2
 LISH_PATCH=1
-LISH_LOCAL_LIBS=0
+LISH_LOCAL_LIBS=1
 
 LISH_VERSION=v$(LISH_MAJOR).$(LISH_MINOR).$(LISH_PATCH)
 LISH_INSTALL_PATH=/usr/local/lib/lish/$(LISH_MAJOR).$(LISH_MINOR)/
@@ -35,7 +35,7 @@ build_bin_structure:
 
 clean:
 	@echo "Cleaning project..."
-	@rm -rf $(OBJECT_DIR)
+	@rm -rf bin
 	@rm -f $(EXECUTABLE)
 
 install: all
