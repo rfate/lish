@@ -56,8 +56,14 @@ struct lval_t {
       int             count;
       struct lval_t** cell;
     } expr;
-  } data;
 
+    // table
+    struct {
+      int             count;
+      struct lval_t** keys;
+      struct lval_t** vals;
+    } table;
+  } data;
 };
 #pragma pack(pop)
 

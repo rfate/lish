@@ -60,5 +60,6 @@ lval_t* builtin_ne(lenv_t*, lval_t*);
 // io
 lval_t* builtin_load(lenv_t*, lval_t*);
 lval_t* builtin_puts(lenv_t*, lval_t*);
+lval_t* builtin_error(lenv_t*, lval_t*);
 
 #endif

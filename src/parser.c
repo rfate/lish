@@ -9,7 +9,6 @@ void parser_init(void) {
   parser_symbol    = mpc_new("symbol");
   parser_litsymbol = mpc_new("litsymbol");
   parser_operator  = mpc_new("operator");
-  parser_tablekey  = mpc_new("tablekey");
   parser_tablepair = mpc_new("tablepair");
   parser_table     = mpc_new("table");
   parser_sexpr     = mpc_new("sexpr");
@@ -19,8 +18,7 @@ void parser_init(void) {
 
   mpca_lang(MPC_LANG_DEFAULT,
     "                                                            \
-      tablekey : <symbol> | <string> | <litsymbol>              ;\
-      tablepair: <tablekey> \"=\" <expr>                        ;\
+      tablepair: <expr> \"=\" <expr>                            ;\
       table    : '[' <tablepair>+ (/, */ <tablepair>)* ']'      ;\
                                                                  \
       integer  : /-?[0-9]+/                                     ;\
@@ -40,16 +38,16 @@ void parser_init(void) {
                                                                  \
       lish     : /^/ <expr>* /$/                                ;\
     ",
-			parser_tablekey, parser_tablepair, parser_table,
-      parser_integer, parser_float, parser_string, parser_symbol,
-      parser_litsymbol, parser_operator, parser_boolean, parser_comment,
-      parser_sexpr, parser_qexpr, parser_expr, parser_lish);
+			parser_tablepair, parser_table, parser_integer, parser_float,
+      parser_string, parser_symbol, parser_litsymbol, parser_operator,
+      parser_boolean, parser_comment, parser_sexpr, parser_qexpr,
+      parser_expr, parser_lish);
 }
 
 void parser_cleanup(void) {
-  mpc_cleanup(14, parser_tablekey, parser_tablepair, parser_table,
-    parser_integer, parser_float, parser_string, parser_symbol,
-    parser_operator, parser_boolean, parser_comment, parser_litsymbol,
-    parser_sexpr, parser_qexpr, parser_expr, parser_lish);
+  mpc_cleanup(13, parser_tablepair, parser_table, parser_integer,
+    parser_float, parser_string, parser_symbol, parser_operator,
+    parser_boolean, parser_comment, parser_litsymbol, parser_sexpr,
+    parser_qexpr, parser_expr, parser_lish);
 }
 

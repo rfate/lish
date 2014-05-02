@@ -11,7 +11,6 @@ mpc_parser_t* parser_string;
 mpc_parser_t* parser_symbol;
 mpc_parser_t* parser_litsymbol;
 mpc_parser_t* parser_operator;
-mpc_parser_t* parser_tablekey;
 mpc_parser_t* parser_tablepair;
 mpc_parser_t* parser_table;
 mpc_parser_t* parser_sexpr;

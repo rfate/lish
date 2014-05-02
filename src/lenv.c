@@ -143,5 +143,6 @@ void lenv_add_builtins(lenv_t* e) {
   // io
   lenv_add_builtin(e, "puts", builtin_puts);
   lenv_add_builtin(e, "load", builtin_load);
+  lenv_add_builtin(e, "error", builtin_error);
 }
 

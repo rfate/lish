@@ -3,6 +3,12 @@
   def (head f) (lambda (tail f) b)
 }))
 
+(def @assert (lambda {expr} {
+  if (? (eval expr))
+    { } # It's fine. do nothing.
+    { error "Assertion failed:" }
+}))
+
 # Some aliases.
 (def @λ  lambda)
 (def @!! ?)

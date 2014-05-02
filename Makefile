@@ -13,7 +13,7 @@ CDEFINES=-DLISH_VERSION=\"$(LISH_VERSION)\"           \
          -DLISH_INSTALL_PATH=\"$(LISH_INSTALL_PATH)\"
 
 CC=clang
-CFLAGS=-c -std=c11 -Wall $(CDEFINES)
+CFLAGS=-c -g -ggdb -std=c11 -Wall $(CDEFINES)
 LDFLAGS=-lm
 
 sourcesubdirs=$(shell find src -type d | grep -v "src$$" | awk '{gsub("src/","bin/",$$1); print $$1}'|xargs)
@@ -22,6 +22,7 @@ rwildcard=$(foreach d, $(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst
 SOURCES=$(call rwildcard, src/, *.c)
 OBJECTS=$(SOURCES:src/%.c=bin/%.o)
 
+.PHONY: all $(EXECUTABLE) build_bin_structure clean install
 all: build_bin_structure $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)

@@ -109,8 +109,8 @@ void lval_del(lval_t* v) {
       break;
 
     case LVAL_TABLE:
-      lenv_del(v->data.func.env);
-      break;
+      lval_table_del(v);
+      return;
 
     case LVAL_FUN:
       if (!v->data.func.builtin) {
@@ -185,7 +185,7 @@ int lval_eq(lval_t* x, lval_t* y) {
 
     case LVAL_SYM:
       return (strcmp(x->data.sym.name, y->data.sym.name) == 0
-            || x->data.sym.lit == y->data.sym.lit);
+            && x->data.sym.lit == y->data.sym.lit);
 
     case LVAL_FUN:
       if (x->data.func.builtin || y->data.func.builtin) {
@@ -307,7 +307,7 @@ lval_t* lval_read_table(mpc_ast_t* t) {
   for (int i = 0; i < t->children_num; ++i) {
     if (strstr(t->children[i]->tag, "tablepair")) {
       lval_t* p = lval_read_table_pair(t->children[i]);
-      lenv_set(x->data.func.env, p->data.expr.cell[0], p->data.expr.cell[1]);
+      lval_table_set(x, p->data.expr.cell[0], p->data.expr.cell[1]);
       lval_del(p);
     }
   }
@@ -492,6 +492,9 @@ lval_t* lval_eval(lenv_t* e, lval_t* v) {
 }
 
 lval_t* lval_copy(lval_t* v) {
+  if (v->type == LVAL_TABLE)
+    return lval_table_copy(v);
+
   lval_t* x = malloc(sizeof(lval_t));
   x->type = v->type;
 
@@ -510,10 +513,6 @@ lval_t* lval_copy(lval_t* v) {
         x->data.func.formals = lval_copy(v->data.func.formals);
         x->data.func.body    = lval_copy(v->data.func.body);
       }
-      break;
-
-    case LVAL_TABLE:
-      x->data.func.env = lenv_copy(v->data.func.env);
       break;
 
     case LVAL_STR:

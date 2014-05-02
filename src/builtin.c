@@ -3,6 +3,19 @@
 #include "lenv.h"
 #include "parser.h"
 
+lval_t* builtin_error(lenv_t* e, lval_t* a) {
+  lval_t* x;
+
+  if (a->data.expr.count == 0 || a->data.expr.cell[0]->type != LVAL_STR) {
+    x = lval_err("");
+  } else {
+    x = lval_err(a->data.expr.cell[0]->data.str);
+  }
+
+  lval_del(a);
+  return x;
+}
+
 lval_t* builtin_deref(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("deref", a, 1);
   LASSERT_ARG_TYPE("deref", a, 0, LVAL_SYM);
@@ -417,7 +430,7 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
   if (a->data.expr.cell[0]->type == LVAL_STR)
     x = lval_int(strlen(a->data.expr.cell[0]->data.str));
   if (a->data.expr.cell[0]->type == LVAL_TABLE)
-    x = lval_int(a->data.expr.cell[0]->data.func.env->count);
+    return lval_table_len(a);
 
   lval_del(a);
 
