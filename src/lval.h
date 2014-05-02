@@ -48,6 +48,7 @@ struct lval_t {
       lbuiltin builtin;
       lval_t*  formals;
       lval_t*  body;
+      lenv_t*  env;
     } func;
 
     // sexpr, qexpr
@@ -57,7 +58,6 @@ struct lval_t {
     } expr;
   } data;
 
-  lenv_t*  env;
 };
 #pragma pack(pop)
 

@@ -358,7 +358,7 @@ lval_t* builtin_nth(lenv_t* e, lval_t* a) {
     return lval_str_nth(a);
 
   // This should never be possible.
-  lval_t* x = lval_err("nth reached of body. this shouldn't happen. type: %s",
+  lval_t* x = lval_err("Builtin \"nth\" reached default case. given type: %s",
     ltype_name(a->data.expr.cell[0]->type));
 
   lval_del(a);
@@ -417,7 +417,7 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
   if (a->data.expr.cell[0]->type == LVAL_STR)
     x = lval_int(strlen(a->data.expr.cell[0]->data.str));
   if (a->data.expr.cell[0]->type == LVAL_TABLE)
-    x = lval_int(a->data.expr.cell[0]->env->count);
+    x = lval_int(a->data.expr.cell[0]->data.func.env->count);
 
   lval_del(a);
 

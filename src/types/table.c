@@ -3,8 +3,8 @@
 
 lval_t* lval_table(void) {
   lval_t* v = malloc(sizeof(lval_t));
-  v->type = LVAL_TABLE;
-  v->env  = lenv_new();
+  v->type           = LVAL_TABLE;
+  v->data.func.env  = lenv_new();
 
   return v;
 }
@@ -12,11 +12,11 @@ lval_t* lval_table(void) {
 void lval_table_print(lval_t* v) {
   putchar('[');
 
-  for (int i = 0; i < v->env->count; ++i) {
+  for (int i = 0; i < v->data.func.env->count; ++i) {
     if (i > 0) { printf(","); }
 
-    printf(" %s = ", v->env->syms[i]);
-    lval_print(v->env->vals[i]);
+    printf(" %s = ", v->data.func.env->syms[i]);
+    lval_print(v->data.func.env->vals[i]);
   }
 
   puts(" ]");
@@ -24,7 +24,7 @@ void lval_table_print(lval_t* v) {
 
 lval_t* lval_table_nth(lval_t* a) {
   lval_t* x;
-  int length = a->data.expr.cell[0]->env->count;
+  int length = a->data.expr.cell[0]->data.func.env->count;
   long i     = a->data.expr.cell[1]->data.num;
 
   // If negative index, check backwards.
@@ -36,7 +36,7 @@ lval_t* lval_table_nth(lval_t* a) {
   if (i >= length || i < 0) {
     x = lval_qexpr();
   } else {
-    x = lval_copy(a->data.expr.cell[0]->env->vals[i]);
+    x = lval_copy(a->data.expr.cell[0]->data.func.env->vals[i]);
   }
 
   lval_del(a);
@@ -51,7 +51,7 @@ lval_t* lval_table_el(lval_t* a) {
     x = lval_err("Builtin \"el\" cannot access index of non-index type %s",
       ltype_name(a->data.expr.cell[1]->type));
   } else {
-    x = lenv_get(a->data.expr.cell[0]->env, a->data.expr.cell[1]);
+    x = lenv_get(a->data.expr.cell[0]->data.func.env, a->data.expr.cell[1]);
   }
 
   lval_del(a);

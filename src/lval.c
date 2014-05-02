@@ -92,7 +92,7 @@ lval_t* lval_sexpr(void) {
 lval_t* lval_lambda(lval_t* formals, lval_t* body) {
   lval_t* v = malloc(sizeof(lval_t));
   v->type              = LVAL_FUN;
-  v->env               = lenv_new();
+  v->data.func.env     = lenv_new();
   v->data.func.builtin = NULL;
   v->data.func.formals = formals;
   v->data.func.body    = body;
@@ -109,12 +109,12 @@ void lval_del(lval_t* v) {
       break;
 
     case LVAL_TABLE:
-      lenv_del(v->env);
+      lenv_del(v->data.func.env);
       break;
 
     case LVAL_FUN:
       if (!v->data.func.builtin) {
-        lenv_del(v->env);
+        lenv_del(v->data.func.env);
         lval_del(v->data.func.formals);
         lval_del(v->data.func.body);
       }
@@ -237,7 +237,7 @@ lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
     lval_t* sym = lval_pop(f->data.func.formals, 0);
     lval_t* val = lval_pop(a, 0);
 
-    lenv_set(f->env, sym, val);
+    lenv_set(f->data.func.env, sym, val);
 
     lval_del(sym);
     lval_del(val);
@@ -246,9 +246,9 @@ lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
   lval_del(a);
 
   if (f->data.func.formals->data.expr.count == 0) {
-    f->env->parent = e;
+    f->data.func.env->parent = e;
 
-    return builtin_eval(f->env, lval_add(lval_sexpr(), lval_copy(f->data.func.body)));
+    return builtin_eval(f->data.func.env, lval_add(lval_sexpr(), lval_copy(f->data.func.body)));
   }
     
   return lval_copy(f);
@@ -307,7 +307,7 @@ lval_t* lval_read_table(mpc_ast_t* t) {
   for (int i = 0; i < t->children_num; ++i) {
     if (strstr(t->children[i]->tag, "tablepair")) {
       lval_t* p = lval_read_table_pair(t->children[i]);
-      lenv_set(x->env, p->data.expr.cell[0], p->data.expr.cell[1]);
+      lenv_set(x->data.func.env, p->data.expr.cell[0], p->data.expr.cell[1]);
       lval_del(p);
     }
   }
@@ -505,7 +505,7 @@ lval_t* lval_copy(lval_t* v) {
       if (v->data.func.builtin) {
         x->data.func.builtin = v->data.func.builtin;
       } else {
-        x->env               = lenv_copy(v->env);
+        x->data.func.env     = lenv_copy(v->data.func.env);
         x->data.func.builtin = NULL;
         x->data.func.formals = lval_copy(v->data.func.formals);
         x->data.func.body    = lval_copy(v->data.func.body);
@@ -513,7 +513,7 @@ lval_t* lval_copy(lval_t* v) {
       break;
 
     case LVAL_TABLE:
-      x->env = lenv_copy(v->env);
+      x->data.func.env = lenv_copy(v->data.func.env);
       break;
 
     case LVAL_STR:
