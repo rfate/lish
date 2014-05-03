@@ -1,2 +1,4 @@
 #!/usr/bin/env lish
-(puts (Math.fact 5))
+(puts "Running tests.")
+(load "test/table.lish")
+

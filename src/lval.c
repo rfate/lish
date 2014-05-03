@@ -206,6 +206,22 @@ int lval_eq(lval_t* x, lval_t* y) {
       }
       return 1;
       break;
+ 
+    case LVAL_TABLE:
+      if (x->data.table.count != y->data.table.count)
+        return 0;
+
+      for (int i = 0; i < x->data.table.count; ++i) {
+        if (!lval_eq(x->data.table.keys[i], y->data.table.keys[i]))
+          return 0;
+
+        if (!lval_eq(x->data.table.vals[i], y->data.table.vals[i]))
+          return 0;
+      }
+
+      return 1;
+
+      break;
   }
 
   printf("Warning! Comparison reached default case!\n");

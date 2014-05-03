@@ -1,0 +1,28 @@
+(def @test_table [
+  @a       = 42,
+  0        =  2,
+  0.2      =  3,
+  "a"      = 16,
+  {}       = 32,
+  true     = 19,
+  [@x = 0] = 64
+])
+
+(puts "  - testing table...")
+
+(assert { ==  7 (len test_table   ) } "len returns length")
+(assert { == 16 (nth test_table  3) } "positive nth returns nth")
+(assert { == 19 (nth test_table -2) } "negative nth returns nth from tail")
+
+(assert { ! (== [@x = 9] test_table)  } "inequality is correct")
+(assert {    == test_table test_table } "equality is correct")
+
+# Need to test every lval type as index, just to be sure.
+(assert { == 42 (el test_table @a )     } "el with symbol key")
+(assert { ==  2 (el test_table 0  )     } "el with integer key")
+(assert { ==  3 (el test_table 0.2)     } "el with float key")
+(assert { == 16 (el test_table "a")     } "el with string key")
+(assert { == 32 (el test_table {} )     } "el with qexpr key")
+(assert { == 19 (el test_table true)    } "el with boolean key")
+(assert { == 64 (el test_table [@x = 0])} "el with table key")
+

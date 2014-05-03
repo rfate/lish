@@ -22,7 +22,7 @@ rwildcard=$(foreach d, $(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst
 SOURCES=$(call rwildcard, src/, *.c)
 OBJECTS=$(SOURCES:src/%.c=bin/%.o)
 
-.PHONY: all $(EXECUTABLE) build_bin_structure clean install
+.PHONY: all $(EXECUTABLE) build_bin_structure clean install test
 all: build_bin_structure $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
@@ -30,6 +30,9 @@ $(EXECUTABLE): $(OBJECTS)
 
 bin/%.o: src/%.c
 	$(CC) $(CFLAGS) $< -o $@
+
+test:
+	@./$(EXECUTABLE) test.lish
 
 build_bin_structure:
 	@mkdir -p $(sourcesubdirs)
