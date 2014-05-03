@@ -70,10 +70,15 @@ lval_t* builtin_concat(lenv_t* e, lval_t* a) {
 lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("substr", a, 0, LVAL_STR);
 
+  lval_t* x;
+
   // Don't know why this would be needed, but if provided
   // only a string, return the full string.
-  if (a->data.expr.count == 1)
-    return a->data.expr.cell[0];
+  if (a->data.expr.count == 1) {
+    x = lval_copy(a->data.expr.cell[0]);
+    lval_del(a);
+    return x;
+  }
 
   LASSERT_ARG_IS_NUM("substr", a, 1);
 
@@ -107,7 +112,7 @@ lval_t* builtin_substr(lenv_t* e, lval_t* a) {
   strncpy(newString, &a->data.expr.cell[0]->data.str[start], end - start);
   newString[end - start] = '\0';
   
-  lval_t* x = lval_str(newString);
+  x = lval_str(newString);
 
   free(newString);
   lval_del(a);
