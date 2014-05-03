@@ -45,3 +45,23 @@ lval_t* lval_str_nth(lval_t* a) {
   return x;
 }
 
+lval_t* lval_str_len(lval_t* a) {
+  lval_t* x = lval_int(strlen(a->data.expr.cell[0]->data.str));
+
+  lval_del(a);
+  return x;
+}
+
+lval_t* lval_str_tosym(lval_t* a) {
+  lval_t* x;
+
+  if (strlen(a->data.expr.cell[0]->data.str) == 0) {
+    x = lval_err("Cannot define empty symbol.");
+  } else {
+    x = lval_sym(a->data.expr.cell[0]->data.str, 1);
+  }
+
+  lval_del(a);
+  return x;
+}
+

@@ -119,10 +119,7 @@ lval_t* builtin_tosym(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("tosym", a, 1);
   LASSERT_ARG_TYPE("tosym", a, 0, LVAL_STR);
 
-  lval_t* x = lval_sym(a->data.expr.cell[0]->data.str, 1);
-  lval_del(a);
-
-  return x;
+  return lval_str_tosym(a);
 }
 
 lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
@@ -428,7 +425,7 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
   if (a->data.expr.cell[0]->type == LVAL_QEXPR)
     x = lval_int(a->data.expr.cell[0]->data.expr.count);
   if (a->data.expr.cell[0]->type == LVAL_STR)
-    x = lval_int(strlen(a->data.expr.cell[0]->data.str));
+    return lval_str_len(a);
   if (a->data.expr.cell[0]->type == LVAL_TABLE)
     return lval_table_len(a);
 

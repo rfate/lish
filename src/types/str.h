@@ -9,6 +9,8 @@ void lval_str_print(lval_t*);
 
 // builtins
 lval_t* lval_str_nth(lval_t*);
+lval_t* lval_str_len(lval_t*);
+lval_t* lval_str_tosym(lval_t*);
 
 #endif
 
