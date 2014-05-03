@@ -425,7 +425,7 @@ lval_t* builtin_len(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("len", a, 1);
   LASSERT_ARG_ITERABLE("len", a, 0);
     
-  lval_t* x;
+  lval_t* x = NULL;
 
   if (a->data.expr.cell[0]->type == LVAL_QEXPR)
     x = lval_int(a->data.expr.cell[0]->data.expr.count);
