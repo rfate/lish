@@ -1,7 +1,7 @@
 #include "builtin.h"
 #include "lval.h"
 #include "lenv.h"
-#include "parser.h"
+#include "grammar.h"
 
 lval_t* builtin_error(lenv_t* e, lval_t* a) {
   lval_t* x;
@@ -288,7 +288,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
   strcat(path, a->data.expr.cell[0]->data.str);
 
   mpc_result_t r;
-  if (mpc_parse_contents(path, parser_lish, &r)) {
+  if (mpc_parse_contents(path, grammar_lish, &r)) {
     lval_t* expr = lval_read(r.output);
     mpc_ast_delete(r.output);
 

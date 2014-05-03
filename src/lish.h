@@ -1,7 +1,6 @@
 #ifndef _LISH_INTERPRETER_H
 #define _LISH_INTERPRETER_H
 
-#include "parser.h"
 #include "lenv.h"
 
 typedef struct {

@@ -1,9 +1,10 @@
 #include "linenoise.h"
-#include "lish.h"
 #include "mpc.h"
+#include "lish.h"
+#include "grammar.h"
 
 lish_t* lish_new(void) {
-  parser_init();
+  grammar_init();
 
   lish_t* in = malloc(sizeof(lish_t));
   in->env = lenv_new();
@@ -41,7 +42,7 @@ void lish_del(lish_t* in) {
   lenv_del(in->env);
   free(in);
 
-  parser_cleanup();
+  grammar_cleanup();
 }
 
 void lish_repl(lish_t* in) {
@@ -57,7 +58,7 @@ void lish_repl(lish_t* in) {
 
     linenoiseHistoryAdd(input);
 
-    if (mpc_parse("<stdin>", input, parser_lish, &r)) {
+    if (mpc_parse("<stdin>", input, grammar_lish, &r)) {
       lval_t* x = lval_eval(in->env, lval_read(r.output));
       lval_println(x);
       lval_del(x);
