@@ -12,7 +12,7 @@ CDEFINES=-DLISH_VERSION=\"$(LISH_VERSION)\"           \
          -DLISH_LOCAL_LIBS=$(LISH_LOCAL_LIBS)         \
          -DLISH_INSTALL_PATH=\"$(LISH_INSTALL_PATH)\"
 
-CC=clang
+CC=cc
 CFLAGS=-c -g -ggdb -std=c11 -Wall $(CDEFINES)
 LDFLAGS=-lm
 

@@ -423,19 +423,17 @@ lval_t* builtin_join(lenv_t* e, lval_t* a) {
 
 lval_t* builtin_len(lenv_t* e, lval_t* a) {
   LASSERT_ARG_COUNT("len", a, 1);
-  LASSERT_ARG_ITERABLE("len", a, 0);
-    
-  lval_t* x = NULL;
+  
+  switch (a->data.expr.cell[0]->type) {
+    case LVAL_QEXPR: return lval_qexpr_len(a);
+    case LVAL_STR:   return lval_str_len(a);
+    case LVAL_TABLE: return lval_table_len(a);
+  }
 
-  if (a->data.expr.cell[0]->type == LVAL_QEXPR)
-    x = lval_int(a->data.expr.cell[0]->data.expr.count);
-  if (a->data.expr.cell[0]->type == LVAL_STR)
-    return lval_str_len(a);
-  if (a->data.expr.cell[0]->type == LVAL_TABLE)
-    return lval_table_len(a);
+  lval_t* x = lval_err("Type %s has no length.",
+    ltype_name(a->data.expr.cell[0]->type));
 
   lval_del(a);
-
   return x;
 }
 

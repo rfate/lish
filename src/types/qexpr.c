@@ -9,6 +9,13 @@ lval_t* lval_qexpr(void) {
   return v;
 }
 
+lval_t* lval_qexpr_len(lval_t* a) {
+  lval_t* x = lval_int(a->data.expr.cell[0]->data.expr.count);
+
+  lval_del(a);
+  return x;
+}
+
 lval_t* lval_qexpr_nth(lval_t* a) {
   int length = a->data.expr.cell[0]->data.expr.count;
   long i     = a->data.expr.cell[1]->data.num;
