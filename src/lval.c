@@ -138,14 +138,14 @@ void lval_del(lval_t* v) {
 }
 
 lval_t* lval_truthy(lval_t* v) {
-  int b;
+  uint8_t b = FALSE;
 
   switch (v->type) {
     case LVAL_INT:
     case LVAL_FLOAT:
     case LVAL_STR:
     case LVAL_FUN:
-      b = 1;
+      b = TRUE;
       break;
     
     case LVAL_SEXPR:
@@ -170,7 +170,7 @@ int lval_eq(lval_t* x, lval_t* y) {
    && (y->type == LVAL_INT || y->type == LVAL_FLOAT)) {
     return (x->data.num == y->data.num);
   } else if (x->type != y->type) {
-    return 0;
+    return FALSE;
   }
 
   switch (x->type) {
@@ -198,34 +198,34 @@ int lval_eq(lval_t* x, lval_t* y) {
     case LVAL_SEXPR:
     case LVAL_QEXPR:
       if (x->data.expr.count != y->data.expr.count)
-        return 0;
+        return FALSE;
       
       for (int i = 0; i < x->data.expr.count; ++i) {
         if (!lval_eq(x->data.expr.cell[i], y->data.expr.cell[i]))
-          return 0;
+          return FALSE;
       }
-      return 1;
+      return TRUE;
       break;
  
     case LVAL_TABLE:
       if (x->data.table.count != y->data.table.count)
-        return 0;
+        return FALSE;
 
       for (int i = 0; i < x->data.table.count; ++i) {
         if (!lval_eq(x->data.table.keys[i], y->data.table.keys[i]))
-          return 0;
+          return FALSE;
 
         if (!lval_eq(x->data.table.vals[i], y->data.table.vals[i]))
-          return 0;
+          return FALSE;
       }
 
-      return 1;
+      return TRUE;
 
       break;
   }
 
   printf("Warning! Comparison reached default case!\n");
-  return 0;
+  return FALSE;
 }
 
 lval_t* lval_add(lval_t* v, lval_t* x) {
@@ -285,7 +285,7 @@ lval_t* lval_read_float(mpc_ast_t* t) {
 }
 
 lval_t* lval_read_bool(mpc_ast_t* t) {
-  int x = (strcmp(t->contents, "true") == 0);
+  uint8_t x = (strcmp(t->contents, "true") == 0);
 
   return lval_bool(x);
 }
@@ -342,10 +342,10 @@ lval_t* lval_read(mpc_ast_t* t) {
     return lval_read_bool(t);
 
   if (strstr(t->tag, "litsymbol"))
-    return lval_sym(t->children[1]->contents, 1);
+    return lval_sym(t->children[1]->contents, TRUE);
 
   if (strstr(t->tag, "symbol") || strstr(t->tag, "operator"))
-    return lval_sym(t->contents, 0);
+    return lval_sym(t->contents, FALSE);
 
   if (strstr(t->tag, "string"))
     return lval_read_str(t);
@@ -408,7 +408,7 @@ void lval_print_r(lval_t* v, int root) {
       lval_float_print(v);
       break;
     case LVAL_BOOL:
-      printf("%s", (v->data.num == 0) ? "false" : "true");
+      printf("%s", (v->data.num == FALSE) ? "false" : "true");
       break;
     case LVAL_STR:
       lval_str_print(v);
@@ -453,11 +453,11 @@ void lval_print_r(lval_t* v, int root) {
 }
 
 void lval_print(lval_t* v) {
-  lval_print_r(v, 0);
+  lval_print_r(v, FALSE);
 }
 
 void lval_println(lval_t* v) {
-  lval_print_r(v, 1);
+  lval_print_r(v, TRUE);
   putchar('\n');
 }
 
@@ -542,7 +542,7 @@ lval_t* lval_copy(lval_t* v) {
       break;
 
     case LVAL_SYM:
-      x->data.sym.lit = v->data.sym.lit;
+      x->data.sym.lit  = v->data.sym.lit;
       x->data.sym.name = malloc(strlen(v->data.sym.name) + 1);
       strcpy(x->data.sym.name, v->data.sym.name);
       break;
@@ -550,11 +550,11 @@ lval_t* lval_copy(lval_t* v) {
     case LVAL_SEXPR:
     case LVAL_QEXPR:
       x->data.expr.count = v->data.expr.count;
-      x->data.expr.cell = malloc(sizeof(lval_t*) * v->data.expr.count);
+      x->data.expr.cell  = malloc(sizeof(lval_t*) * v->data.expr.count);
+
       for (int i = 0; i < v->data.expr.count; ++i) {
         x->data.expr.cell[i] = lval_copy(v->data.expr.cell[i]);
       }
-
       break;
   }
 
@@ -590,3 +590,4 @@ lval_t* lval_join(lval_t* x, lval_t* y) {
 
   return x;
 }
+

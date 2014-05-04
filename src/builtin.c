@@ -21,7 +21,7 @@ lval_t* builtin_deref(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("deref", a, 0, LVAL_SYM);
   
   lval_t* x = a->data.expr.cell[0];
-  x->data.sym.lit = 0;
+  x->data.sym.lit = FALSE;
 
   lval_t* y = lval_copy(lenv_get(e, x));
   lval_del(a);
@@ -220,7 +220,7 @@ lval_t* builtin_if(lenv_t* e, lval_t* a) {
   a->data.expr.cell[1]->type = LVAL_SEXPR;
   a->data.expr.cell[2]->type = LVAL_SEXPR;
 
-  if (a->data.expr.cell[0]->data.num != 0) {
+  if (a->data.expr.cell[0]->data.num != FALSE) {
     x = lval_eval(e, lval_pop(a, 1));
   } else {
     x = lval_eval(e, lval_pop(a, 2));
@@ -268,7 +268,7 @@ lval_t* builtin_ne(lenv_t* e, lval_t* a) { return builtin_cmp(e, a, "!="); }
 lval_t* builtin_load(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("load", a, 0, LVAL_STR);
 
-  int usePath = 0;
+  uint8_t usePath = FALSE;
 
   // If given a bool to specify loading from path...
   if (a->data.expr.count > 1) {
@@ -305,7 +305,7 @@ lval_t* builtin_load(lenv_t* e, lval_t* a) {
     lval_del(a);
     free(path);
 
-    return lval_bool(1);
+    return lval_bool(TRUE);
   }
 
   char* err_msg = mpc_err_string(r.error);

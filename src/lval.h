@@ -25,6 +25,9 @@ enum {
 
 char* ltype_name(int);
 
+#define TRUE  1
+#define FALSE 0
+
 #pragma pack(push, 1)
 struct lval_t {
   uint8_t type;
