@@ -13,7 +13,7 @@ CDEFINES=-DLISH_VERSION=\"$(LISH_VERSION)\"           \
          -DLISH_INSTALL_PATH=\"$(LISH_INSTALL_PATH)\"
 
 CC=cc
-CFLAGS=-c -g -ggdb -std=c11 -Wall $(CDEFINES)
+CFLAGS=-c -g -ggdb -std=c99 -Wall $(CDEFINES)
 LDFLAGS=-lm
 
 sourcesubdirs=$(shell find src -type d | grep -v "src$$" | awk '{gsub("src/","bin/",$$1); print $$1}'|xargs)
