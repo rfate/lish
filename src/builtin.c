@@ -3,6 +3,18 @@
 #include "lenv.h"
 #include "grammar.h"
 
+lval_t* builtin_exit(lenv_t* e, lval_t* a) {
+  uint8_t code = 0;
+
+  if (a->data.expr.cell[0]->type == LVAL_INT) {
+    // And what if it's too big? oh well, right?
+    code = a->data.expr.cell[0]->data.num;
+  }
+
+  lval_del(a);
+  exit(code);
+}
+
 lval_t* builtin_error(lenv_t* e, lval_t* a) {
   lval_t* x;
 

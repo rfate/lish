@@ -95,6 +95,7 @@ void lenv_add_builtin(lenv_t* e, char* name, lbuiltin func) {
 
 void lenv_add_builtins(lenv_t* e) {
   lenv_add_builtin(e, "type", builtin_type);
+  lenv_add_builtin(e, "exit", builtin_exit);
   
   // symbol
   lenv_add_builtin(e, "deref", builtin_deref);
