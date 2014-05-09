@@ -6,7 +6,11 @@
 (def @assert (lambda {expr name} {
   if (? (eval expr))
     { } # It's fine. do nothing.
-    { error (concat "Assertion failed: " name) }
+    { (map {
+        { puts (error (concat "Assertion failed: " name)) }
+        { exit 1 }
+      } eval)
+    }
 }))
 
 # Some aliases.

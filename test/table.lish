@@ -8,8 +8,6 @@
   []       = 64
 ])
 
-(puts "  - testing table...")
-
 (assert { ==  7 (len test_table   ) } "len returns length")
 (assert { == 16 (nth test_table  3) } "positive nth returns nth")
 (assert { == 19 (nth test_table -2) } "negative nth returns nth from tail")

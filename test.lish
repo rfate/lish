@@ -1,4 +1,23 @@
 #!/usr/bin/env lish
 (puts "Running tests.")
-(load "test/table.lish")
 
+(def @test_names {
+  "table"
+  "string"
+})
+
+(def @load_test (lambda {name} {
+  map {
+    { (puts (concat "  - testing " name)) }
+    { (load (concat (concat "test/" name) ".lish")) }
+  } eval
+}))
+
+(map test_names (lambda {name} {
+  (if (load_test name)
+    { } # all good!
+    { exit 1 }
+  )
+}))
+
+(puts "Done!")
