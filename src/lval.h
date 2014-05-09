@@ -70,8 +70,6 @@ struct lval_t {
 };
 #pragma pack(pop)
 
-lval_t* lval_int(long int);
-lval_t* lval_float(double);
 lval_t* lval_bool(int);
 lval_t* lval_err(char*, ...);
 lval_t* lval_sym(char*, int);
@@ -102,7 +100,8 @@ lval_t* lval_eval_sexpr(lenv_t*, lval_t*);
 
 
 // types
+#include "types/number.h"
+#include "types/string.h"
 #include "types/table.h"
-#include "types/str.h"
 #include "types/qexpr.h"
 #endif

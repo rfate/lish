@@ -1,4 +1,4 @@
-#include "str.h"
+#include "string.h"
 
 lval_t* lval_str(char* str) {
   lval_t* v = malloc(sizeof(lval_t));

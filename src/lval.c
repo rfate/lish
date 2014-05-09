@@ -3,7 +3,9 @@
 #include "lenv.h"
 #include "builtin.h"
 
-char* ltype_name(int t) {
+char*
+ltype_name(int t)
+{
   switch(t) {
     case LVAL_ERR:   return "Error";
     case LVAL_INT:   return "Integer";
@@ -20,33 +22,20 @@ char* ltype_name(int t) {
 }
 
 /// Constructors
-lval_t* lval_int(long int x) {
-  lval_t* v = malloc(sizeof(lval_t));
-  v->type     = LVAL_INT;
-  v->data.num = x;
-
-  return v;
-}
-
-lval_t* lval_float(double x) {
-  lval_t* v = malloc(sizeof(lval_t));
-  v->type     = LVAL_FLOAT;
-  v->data.num = x;
-
-  return v;
-}
-
-lval_t* lval_bool(int x) {
-  lval_t* v = malloc(sizeof(lval_t));
+lval_t*
+lval_bool(int x)
+{
+  lval_t *v = malloc(sizeof(lval_t));
   v->type     = LVAL_BOOL;
-  v->data.num = (x != 0);
+  v->data.num = (x != FALSE);
 
   return v;
 }
 
-
-lval_t* lval_err(char* fmt, ...) {
-  lval_t* v = malloc(sizeof(lval_t));
+lval_t*
+lval_err(char *fmt, ...)
+{
+  lval_t *v = malloc(sizeof(lval_t));
   v->type = LVAL_ERR;
 
   va_list va;
@@ -62,8 +51,10 @@ lval_t* lval_err(char* fmt, ...) {
   return v;
 }
 
-lval_t* lval_sym(char* sym, int lit) {
-  lval_t* v = malloc(sizeof(lval_t));
+lval_t*
+lval_sym(char *sym, int lit)
+{
+  lval_t *v = malloc(sizeof(lval_t));
   v->type          = LVAL_SYM;
   v->data.sym.lit  = lit;
   v->data.sym.name = malloc(strlen(sym) + 1);
@@ -72,16 +63,20 @@ lval_t* lval_sym(char* sym, int lit) {
   return v;
 }
 
-lval_t* lval_fun(lbuiltin func) {
-  lval_t* v = malloc(sizeof(lval_t));
+lval_t*
+lval_fun(lbuiltin func)
+{
+  lval_t *v = malloc(sizeof(lval_t));
   v->type              = LVAL_FUN;
   v->data.func.builtin = func;
 
   return v;
 }
 
-lval_t* lval_sexpr(void) {
-  lval_t* v = malloc(sizeof(lval_t));
+lval_t*
+lval_sexpr(void)
+{
+  lval_t *v = malloc(sizeof(lval_t));
   v->type            = LVAL_SEXPR;
   v->data.expr.count = 0;
   v->data.expr.cell  = NULL;
@@ -89,8 +84,10 @@ lval_t* lval_sexpr(void) {
   return v;
 }
 
-lval_t* lval_lambda(lval_t* formals, lval_t* body) {
-  lval_t* v = malloc(sizeof(lval_t));
+lval_t*
+lval_lambda(lval_t *formals, lval_t *body)
+{
+  lval_t *v = malloc(sizeof(lval_t));
   v->type              = LVAL_FUN;
   v->data.func.env     = lenv_new();
   v->data.func.builtin = NULL;
@@ -101,7 +98,9 @@ lval_t* lval_lambda(lval_t* formals, lval_t* body) {
 }
 ///
 
-void lval_del(lval_t* v) {
+void
+lval_del(lval_t *v)
+{
   switch (v->type) {
     case LVAL_INT:
     case LVAL_FLOAT:
@@ -137,7 +136,9 @@ void lval_del(lval_t* v) {
   free(v);
 }
 
-lval_t* lval_truthy(lval_t* v) {
+lval_t*
+lval_truthy(lval_t *v)
+{
   uint8_t b = FALSE;
 
   switch (v->type) {
@@ -165,7 +166,9 @@ lval_t* lval_truthy(lval_t* v) {
   return lval_bool(b);
 }
 
-int lval_eq(lval_t* x, lval_t* y) {
+int
+lval_eq(lval_t *x, lval_t *y)
+{
   if ((x->type == LVAL_INT || x->type == LVAL_FLOAT)
    && (y->type == LVAL_INT || y->type == LVAL_FLOAT)) {
     return (x->data.num == y->data.num);
@@ -204,8 +207,8 @@ int lval_eq(lval_t* x, lval_t* y) {
         if (!lval_eq(x->data.expr.cell[i], y->data.expr.cell[i]))
           return FALSE;
       }
+
       return TRUE;
-      break;
  
     case LVAL_TABLE:
       if (x->data.table.count != y->data.table.count)
@@ -220,15 +223,15 @@ int lval_eq(lval_t* x, lval_t* y) {
       }
 
       return TRUE;
-
-      break;
   }
 
-  printf("Warning! Comparison reached default case!\n");
+  printf("Warning! Failed to compare types %s.\n", ltype_name(x->type));
   return FALSE;
 }
 
-lval_t* lval_add(lval_t* v, lval_t* x) {
+lval_t*
+lval_add(lval_t *v, lval_t *x)
+{
   v->data.expr.count++;
   v->data.expr.cell = realloc(v->data.expr.cell, sizeof(lval_t*) * v->data.expr.count);
   v->data.expr.cell[v->data.expr.count-1] = x;
@@ -236,7 +239,9 @@ lval_t* lval_add(lval_t* v, lval_t* x) {
   return v;
 }
 
-lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
+lval_t*
+lval_call(lenv_t *e, lval_t *f, lval_t *a)
+{
   if (f->data.func.builtin)
     return f->data.func.builtin(e, a);
 
@@ -250,8 +255,8 @@ lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
         total, given);
     }
 
-    lval_t* sym = lval_pop(f->data.func.formals, 0);
-    lval_t* val = lval_pop(a, 0);
+    lval_t *sym = lval_pop(f->data.func.formals, 0);
+    lval_t *val = lval_pop(a, 0);
 
     lenv_set(f->data.func.env, sym, val);
 
@@ -270,43 +275,53 @@ lval_t* lval_call(lenv_t* e, lval_t* f, lval_t* a) {
   return lval_copy(f);
 }
 
-lval_t* lval_read_int(mpc_ast_t* t) {
+lval_t*
+lval_read_int(mpc_ast_t *t)
+{
   errno = 0;
   long x = strtol(t->contents, NULL, 10);
 
   return errno != ERANGE ? lval_int(x) : lval_err("invalid integer");
 }
 
-lval_t* lval_read_float(mpc_ast_t* t) {
+lval_t*
+lval_read_float(mpc_ast_t *t)
+{
   errno = 0;
   double x = strtod(t->contents, NULL);
 
   return errno != ERANGE ? lval_float(x) : lval_err("invalid float");
 }
 
-lval_t* lval_read_bool(mpc_ast_t* t) {
+lval_t*
+lval_read_bool(mpc_ast_t *t)
+{
   uint8_t x = (strcmp(t->contents, "true") == 0);
 
   return lval_bool(x);
 }
 
-lval_t* lval_read_str(mpc_ast_t* t) {
+lval_t*
+lval_read_str(mpc_ast_t *t)
+{
   // trim ending quote
   t->contents[strlen(t->contents) - 1] = '\0';
 
-  char* unescaped = malloc(strlen(t->contents + 1) + 1);
+  char *unescaped = malloc(strlen(t->contents + 1) + 1);
   strcpy(unescaped, t->contents + 1);
 
   unescaped = mpcf_escape(unescaped);
 
-  lval_t* str = lval_str(unescaped);
+  lval_t *str = lval_str(unescaped);
   free(unescaped);
 
   return str;
 }
 
-lval_t* lval_read_table_pair(mpc_ast_t* t) {
-  lval_t* x = lval_qexpr();
+lval_t*
+lval_read_table_pair(mpc_ast_t *t)
+{
+  lval_t *x = lval_qexpr();
 
   for (int i = 0; i < t->children_num; ++i) {
     if (strcmp(t->children[i]->contents, "=") == 0)  { continue; }
@@ -317,12 +332,14 @@ lval_t* lval_read_table_pair(mpc_ast_t* t) {
   return x;
 }
 
-lval_t* lval_read_table(mpc_ast_t* t) {
-  lval_t* x = lval_table();
+lval_t*
+lval_read_table(mpc_ast_t *t)
+{
+  lval_t *x = lval_table();
 
   for (int i = 0; i < t->children_num; ++i) {
     if (strstr(t->children[i]->tag, "tablepair")) {
-      lval_t* p = lval_read_table_pair(t->children[i]);
+      lval_t *p = lval_read_table_pair(t->children[i]);
       lval_table_set(x, p->data.expr.cell[0], p->data.expr.cell[1]);
       lval_del(p);
     }
@@ -331,7 +348,9 @@ lval_t* lval_read_table(mpc_ast_t* t) {
   return x;
 }
 
-lval_t* lval_read(mpc_ast_t* t) {
+lval_t*
+lval_read(mpc_ast_t *t)
+{
   if (strstr(t->tag, "integer"))
     return lval_read_int(t);
 
@@ -353,7 +372,7 @@ lval_t* lval_read(mpc_ast_t* t) {
   if (strstr(t->tag, "table")) 
     return lval_read_table(t);
 
-  lval_t* x = NULL;
+  lval_t *x = NULL;
   if (strcmp(t->tag, ">") == 0) { x = lval_sexpr(); }
   if (strstr(t->tag, "sexpr"))  { x = lval_sexpr(); }
   if (strstr(t->tag, "qexpr"))  { x = lval_qexpr(); }
@@ -371,7 +390,9 @@ lval_t* lval_read(mpc_ast_t* t) {
   return x;
 }
 
-void lval_expr_print_r(lval_t* v) {
+void
+lval_expr_print_r(lval_t *v)
+{
   for (int i = 0; i < v->data.expr.count; ++i) {
     lval_print(v->data.expr.cell[i]);
 
@@ -382,7 +403,9 @@ void lval_expr_print_r(lval_t* v) {
   }
 }
 
-void lval_expr_print(lval_t* v, char open, char close) {
+void
+lval_expr_print(lval_t *v, char open, char close)
+{
   putchar(open);
 
   lval_expr_print_r(v);
@@ -390,7 +413,9 @@ void lval_expr_print(lval_t* v, char open, char close) {
   putchar(close);
 }
 
-void lval_float_print(lval_t* v) {
+void
+lval_float_print(lval_t *v)
+{
   // ends in zero, print with a trailing zero
   if (fmod(v->data.num, 1) == 0) {
     printf("%.01lf", v->data.num);
@@ -399,7 +424,9 @@ void lval_float_print(lval_t* v) {
   }
 }
 
-void lval_print_r(lval_t* v, int root) {
+void
+lval_print_r(lval_t *v, int root)
+{
   switch (v->type) {
     case LVAL_INT:
       printf("%ld", (long int) v->data.num);
@@ -452,16 +479,22 @@ void lval_print_r(lval_t* v, int root) {
   }
 }
 
-void lval_print(lval_t* v) {
+void
+lval_print(lval_t *v)
+{
   lval_print_r(v, FALSE);
 }
 
-void lval_println(lval_t* v) {
+void
+lval_println(lval_t *v)
+{
   lval_print_r(v, TRUE);
   putchar('\n');
 }
 
-lval_t* lval_eval_sexpr(lenv_t* e, lval_t* v) {
+lval_t*
+lval_eval_sexpr(lenv_t *e, lval_t *v)
+{
   for (int i = 0; i < v->data.expr.count; ++i) {
     v->data.expr.cell[i] = lval_eval(e, v->data.expr.cell[i]);
   }
@@ -478,9 +511,9 @@ lval_t* lval_eval_sexpr(lenv_t* e, lval_t* v) {
     return lval_take(v, 0);
 
   // Ensure first lval is a function
-  lval_t* f = lval_pop(v, 0);
+  lval_t *f = lval_pop(v, 0);
   if (f->type != LVAL_FUN) {
-    lval_t* err = lval_err("S-Expression starts with incorrect type. Expected %s, got %s.",
+    lval_t *err = lval_err("S-Expression starts with incorrect type. Expected %s, got %s.",
       ltype_name(f->type), ltype_name(LVAL_FUN));
 
     lval_del(f);
@@ -489,13 +522,15 @@ lval_t* lval_eval_sexpr(lenv_t* e, lval_t* v) {
     return err;
   }
 
-  lval_t* result = lval_call(e, f, v);
+  lval_t *result = lval_call(e, f, v);
   return result;
 }
 
-lval_t* lval_eval(lenv_t* e, lval_t* v) {
+lval_t*
+lval_eval(lenv_t *e, lval_t *v)
+{
   if (v->type == LVAL_SYM) {
-    lval_t* x = lenv_get(e, v);
+    lval_t *x = lenv_get(e, v);
     lval_del(v);
 
     return x;
@@ -507,11 +542,13 @@ lval_t* lval_eval(lenv_t* e, lval_t* v) {
   return v;
 }
 
-lval_t* lval_copy(lval_t* v) {
+lval_t*
+lval_copy(lval_t *v)
+{
   if (v->type == LVAL_TABLE)
     return lval_table_copy(v);
 
-  lval_t* x = malloc(sizeof(lval_t));
+  lval_t *x = malloc(sizeof(lval_t));
   x->type = v->type;
 
   switch (v->type) {
@@ -561,8 +598,10 @@ lval_t* lval_copy(lval_t* v) {
   return x;
 }
 
-lval_t* lval_pop(lval_t* v, int i) {
-  lval_t* x = v->data.expr.cell[i];
+lval_t*
+lval_pop(lval_t *v, int i)
+{
+  lval_t *x = v->data.expr.cell[i];
 
   memmove(&v->data.expr.cell[i], &v->data.expr.cell[i+1],
       sizeof(lval_t*) * (v->data.expr.count-i-1));
@@ -575,14 +614,18 @@ lval_t* lval_pop(lval_t* v, int i) {
   return x;
 }
 
-lval_t* lval_take(lval_t* v, int i) {
-  lval_t* x = lval_pop(v, i);
+lval_t*
+lval_take(lval_t *v, int i)
+{
+  lval_t *x = lval_pop(v, i);
   lval_del(v);
 
   return x;
 }
 
-lval_t* lval_join(lval_t* x, lval_t* y) {
+lval_t*
+lval_join(lval_t *x, lval_t *y)
+{
   while (y->data.expr.count)
     x = lval_add(x, lval_pop(y, 0));
 
