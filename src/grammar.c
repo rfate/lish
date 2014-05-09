@@ -2,6 +2,7 @@
 
 void grammar_init(void) {
   token_comment   = mpc_new("comment");
+  token_nil       = mpc_new("nil");
   token_integer   = mpc_new("integer");
   token_float     = mpc_new("float");
   token_boolean   = mpc_new("boolean");
@@ -21,6 +22,7 @@ void grammar_init(void) {
       tablepair: <expr> \"=\" <expr>                            ;\
       table    : '[' (<tablepair>+ (/, */ <tablepair>)*)* ']'   ;\
                                                                  \
+      nil      : \"nil\"                                        ;\
       integer  : /-?[0-9]+/                                     ;\
       float    : /-?[0-9]+\\.[0-9]+/                            ;\
       string   : /\"(\\\\.|[^\"])*\"/                           ;\
@@ -34,18 +36,18 @@ void grammar_init(void) {
                                                                  \
       expr     : <float> | <integer> | <string> | <boolean>      \
                | <sexpr> | <qexpr>  | <comment> | <litsymbol>    \
-               | <symbol> | <operator> | <table>                ;\
+               | <nil> | <symbol> | <operator> | <table>        ;\
                                                                  \
       lish     : /^/ <expr>* /$/                                ;\
     ",
-			token_tablepair, token_table, token_integer, token_float,
+			token_tablepair, token_table, token_nil, token_integer, token_float,
       token_string, token_symbol, token_litsymbol, token_operator,
       token_boolean, token_comment, token_sexpr, token_qexpr,
       token_expr, grammar_lish);
 }
 
 void grammar_cleanup(void) {
-  mpc_cleanup(13, token_tablepair, token_table, token_integer,
+  mpc_cleanup(14, token_tablepair, token_table, token_nil, token_integer,
     token_float, token_string, token_symbol, token_operator,
     token_boolean, token_comment, token_litsymbol, token_sexpr,
     token_qexpr, token_expr, grammar_lish);

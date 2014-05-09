@@ -7,6 +7,7 @@ char*
 ltype_name(int t)
 {
   switch(t) {
+    case LVAL_NIL:   return "Nil";
     case LVAL_ERR:   return "Error";
     case LVAL_INT:   return "Integer";
     case LVAL_FLOAT: return "Float";
@@ -22,6 +23,15 @@ ltype_name(int t)
 }
 
 /// Constructors
+lval_t*
+lval_nil(void)
+{
+  lval_t *v = malloc(sizeof(lval_t));
+  v->type = LVAL_NIL;
+
+  return v;
+}
+
 lval_t*
 lval_bool(int x)
 {
@@ -142,6 +152,10 @@ lval_truthy(lval_t *v)
   uint8_t b = FALSE;
 
   switch (v->type) {
+    case LVAL_NIL:
+      b = FALSE;
+      break;
+
     case LVAL_INT:
     case LVAL_FLOAT:
     case LVAL_STR:
@@ -177,6 +191,9 @@ lval_eq(lval_t *x, lval_t *y)
   }
 
   switch (x->type) {
+    case LVAL_NIL:
+      return TRUE;
+
     case LVAL_BOOL:
       return (x->data.num == y->data.num);
 
@@ -326,7 +343,9 @@ lval_read_table_pair(mpc_ast_t *t)
   for (int i = 0; i < t->children_num; ++i) {
     if (strcmp(t->children[i]->contents, "=") == 0)  { continue; }
 
-    x = lval_add(x, lval_read(t->children[i]));
+    lval_t *v = lval_read(t->children[i]);
+
+    x = lval_add(x, v);
   }
 
   return x;
@@ -351,6 +370,9 @@ lval_read_table(mpc_ast_t *t)
 lval_t*
 lval_read(mpc_ast_t *t)
 {
+  if (strstr(t->tag, "nil"))
+    return lval_nil();
+
   if (strstr(t->tag, "integer"))
     return lval_read_int(t);
 
@@ -428,6 +450,9 @@ void
 lval_print_r(lval_t *v, int root)
 {
   switch (v->type) {
+    case LVAL_NIL:
+      printf("nil");
+      break;
     case LVAL_INT:
       printf("%ld", (long int) v->data.num);
       break;

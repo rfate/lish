@@ -11,6 +11,7 @@ typedef struct lenv_t lenv_t;
 typedef lval_t*(*lbuiltin)(lenv_t*, lval_t*);
 
 enum {
+  LVAL_NIL,
   LVAL_ERR,
   LVAL_INT,
   LVAL_FLOAT,
@@ -70,6 +71,7 @@ struct lval_t {
 };
 #pragma pack(pop)
 
+lval_t* lval_nil(void);
 lval_t* lval_bool(int);
 lval_t* lval_err(char*, ...);
 lval_t* lval_sym(char*, int);

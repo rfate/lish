@@ -1,7 +1,9 @@
 #include "string.h"
 
-lval_t* lval_str(char* str) {
-  lval_t* v = malloc(sizeof(lval_t));
+lval_t*
+lval_str(char *str)
+{
+  lval_t *v = malloc(sizeof(lval_t));
   v->type     = LVAL_STR;
   v->data.str = malloc(strlen(str) + 1);
   strcpy(v->data.str, str);
@@ -9,8 +11,10 @@ lval_t* lval_str(char* str) {
   return v;
 }
 
-void lval_str_print(lval_t* v) {
-  char* escaped = malloc(strlen(v->data.str) + 1);
+void
+lval_str_print(lval_t *v)
+{
+  char *escaped = malloc(strlen(v->data.str) + 1);
   strcpy(escaped, v->data.str);
 
   escaped = mpcf_escape(escaped);
@@ -20,11 +24,13 @@ void lval_str_print(lval_t* v) {
   free(escaped);
 }
 
-lval_t* lval_str_nth(lval_t* a) {
+lval_t*
+lval_str_nth(lval_t *a)
+{
   long i     = a->data.expr.cell[1]->data.num;
   int length = strlen(a->data.expr.cell[0]->data.str);
 
-  lval_t* x;
+  lval_t *x;
 
   if (i < 0) {
     i = length + i;
@@ -32,9 +38,9 @@ lval_t* lval_str_nth(lval_t* a) {
 
   // Out of bounds.
   if (i >= length || i < 0) {
-    x = lval_qexpr();
+    x = lval_nil();
   } else {
-    char* str = malloc(2);
+    char *str = malloc(2);
     strncpy(str, a->data.expr.cell[0]->data.str + i, 1);
     str[1] = '\0';
     x = lval_str(str);
@@ -45,15 +51,18 @@ lval_t* lval_str_nth(lval_t* a) {
   return x;
 }
 
-lval_t* lval_str_len(lval_t* a) {
-  lval_t* x = lval_int(strlen(a->data.expr.cell[0]->data.str));
+lval_t *lval_str_len(lval_t *a)
+{
+  lval_t *x = lval_int(strlen(a->data.expr.cell[0]->data.str));
 
   lval_del(a);
   return x;
 }
 
-lval_t* lval_str_tosym(lval_t* a) {
-  lval_t* x;
+lval_t*
+lval_str_tosym(lval_t *a)
+{
+  lval_t *x;
 
   if (strlen(a->data.expr.cell[0]->data.str) == 0) {
     x = lval_err("Cannot define empty symbol.");
