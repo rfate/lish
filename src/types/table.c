@@ -1,4 +1,5 @@
 #include "table.h"
+#include "number.h"
 #include "../lenv.h"
 
 lval_t*

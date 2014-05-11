@@ -3,6 +3,11 @@
 #include "lenv.h"
 #include "builtin.h"
 
+#include "types/string.h"
+#include "types/qexpr.h"
+#include "types/number.h"
+#include "types/table.h"
+
 char*
 ltype_name(int t)
 {

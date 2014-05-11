@@ -3,6 +3,11 @@
 #include "lenv.h"
 #include "grammar.h"
 
+#include "types/table.h"
+#include "types/number.h"
+#include "types/string.h"
+#include "types/qexpr.h"
+
 lval_t* builtin_exit(lenv_t* e, lval_t* a) {
   uint8_t code = 0;
 

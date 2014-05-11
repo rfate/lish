@@ -2,6 +2,8 @@
 #include "mpc.h"
 #include "lish.h"
 #include "grammar.h"
+#include "types/qexpr.h"
+#include "types/string.h"
 
 lish_t* lish_new(void) {
   grammar_init();

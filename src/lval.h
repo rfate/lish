@@ -37,39 +37,39 @@ struct lval_t {
 
   union {
     // int, float, bool
-    double   num;
+    double num;
     // string
-    char*    str;
+    char  *str;
     // error
-    char*    err;
+    char  *err;
 
     mpz_t bignum;
 
     // symbol, literal or otherwise
     struct {
-      char*   name;
+      char   *name;
       uint8_t lit;
     } sym;
 
     // lambda and builtin
     struct {
       lbuiltin builtin;
-      lval_t*  formals;
-      lval_t*  body;
-      lenv_t*  env;
+      lval_t  *formals;
+      lval_t  *body;
+      lenv_t  *env;
     } func;
 
     // sexpr, qexpr
     struct {
       int             count;
-      struct lval_t** cell;
+      struct lval_t **cell;
     } expr;
 
     // table
     struct {
       int             count;
-      struct lval_t** keys;
-      struct lval_t** vals;
+      struct lval_t **keys;
+      struct lval_t **vals;
     } table;
   } data;
 };
@@ -104,10 +104,5 @@ lval_t* lval_take(lval_t*, int);
 lval_t* lval_eval      (lenv_t*, lval_t*);
 lval_t* lval_eval_sexpr(lenv_t*, lval_t*);
 
-
-// types
-#include "types/number.h"
-#include "types/string.h"
-#include "types/table.h"
-#include "types/qexpr.h"
 #endif
+

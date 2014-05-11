@@ -1,4 +1,5 @@
 #include "string.h"
+#include "number.h"
 
 lval_t*
 lval_str(char *str)

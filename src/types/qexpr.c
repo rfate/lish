@@ -1,4 +1,5 @@
 #include "qexpr.h"
+#include "number.h"
 
 lval_t*
 lval_qexpr(void)
