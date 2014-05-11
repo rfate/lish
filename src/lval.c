@@ -7,18 +7,19 @@ char*
 ltype_name(int t)
 {
   switch(t) {
-    case LVAL_NIL:   return "Nil";
-    case LVAL_ERR:   return "Error";
-    case LVAL_INT:   return "Integer";
-    case LVAL_FLOAT: return "Float";
-    case LVAL_BOOL:  return "Boolean";
-    case LVAL_STR:   return "String";
-    case LVAL_SYM:   return "Symbol";
-    case LVAL_FUN:   return "Function";
-    case LVAL_SEXPR: return "S-Expression";
-    case LVAL_QEXPR: return "Q-Expression";
-    case LVAL_TABLE: return "Table";
-    default:         return "Unknown";
+    case LVAL_NIL:    return "Nil";
+    case LVAL_ERR:    return "Error";
+    case LVAL_INT:    return "Integer";
+    case LVAL_BIGINT: return "BigInt";
+    case LVAL_FLOAT:  return "Float";
+    case LVAL_BOOL:   return "Boolean";
+    case LVAL_STR:    return "String";
+    case LVAL_SYM:    return "Symbol";
+    case LVAL_FUN:    return "Function";
+    case LVAL_SEXPR:  return "S-Expression";
+    case LVAL_QEXPR:  return "Q-Expression";
+    case LVAL_TABLE:  return "Table";
+    default:          return "Unknown";
   }
 }
 
@@ -112,10 +113,9 @@ void
 lval_del(lval_t *v)
 {
   switch (v->type) {
-    case LVAL_INT:
-    case LVAL_FLOAT:
-    case LVAL_BOOL:
-      break;
+    case LVAL_BIGINT:
+      mpz_clear(v->data.bignum);
+      return;
 
     case LVAL_TABLE:
       lval_table_del(v);
@@ -158,11 +158,12 @@ lval_truthy(lval_t *v)
 
     case LVAL_INT:
     case LVAL_FLOAT:
+    case LVAL_BIGINT:
     case LVAL_STR:
     case LVAL_FUN:
       b = TRUE;
       break;
-    
+
     case LVAL_SEXPR:
     case LVAL_QEXPR:
       b = (v->data.expr.count > 0);
@@ -219,14 +220,14 @@ lval_eq(lval_t *x, lval_t *y)
     case LVAL_QEXPR:
       if (x->data.expr.count != y->data.expr.count)
         return FALSE;
-      
+
       for (int i = 0; i < x->data.expr.count; ++i) {
         if (!lval_eq(x->data.expr.cell[i], y->data.expr.cell[i]))
           return FALSE;
       }
 
       return TRUE;
- 
+
     case LVAL_TABLE:
       if (x->data.table.count != y->data.table.count)
         return FALSE;
@@ -288,7 +289,7 @@ lval_call(lenv_t *e, lval_t *f, lval_t *a)
 
     return builtin_eval(f->data.func.env, lval_add(lval_sexpr(), lval_copy(f->data.func.body)));
   }
-    
+
   return lval_copy(f);
 }
 
@@ -296,9 +297,13 @@ lval_t*
 lval_read_int(mpc_ast_t *t)
 {
   errno = 0;
-  long x = strtol(t->contents, NULL, 10);
+  long n = strtol(t->contents, NULL, 10);
 
-  return errno != ERANGE ? lval_int(x) : lval_err("invalid integer");
+  if (errno == ERANGE) {
+    return lval_bigint(t->contents);
+  } else {
+    return lval_int(n);
+  }
 }
 
 lval_t*
@@ -391,7 +396,7 @@ lval_read(mpc_ast_t *t)
   if (strstr(t->tag, "string"))
     return lval_read_str(t);
 
-  if (strstr(t->tag, "table")) 
+  if (strstr(t->tag, "table"))
     return lval_read_table(t);
 
   lval_t *x = NULL;
@@ -458,6 +463,9 @@ lval_print_r(lval_t *v, int root)
       break;
     case LVAL_FLOAT:
       lval_float_print(v);
+      break;
+    case LVAL_BIGINT:
+      gmp_printf("%Zd", v->data.bignum);
       break;
     case LVAL_BOOL:
       printf("%s", (v->data.num == FALSE) ? "false" : "true");
@@ -582,6 +590,9 @@ lval_copy(lval_t *v)
     case LVAL_BOOL:
       x->data.num = v->data.num;
       break;
+    case LVAL_BIGINT:
+      mpz_init_set(x->data.bignum, v->data.bignum);
+      break;
     case LVAL_FUN:
       if (v->data.func.builtin) {
         x->data.func.builtin = v->data.func.builtin;
@@ -658,4 +669,3 @@ lval_join(lval_t *x, lval_t *y)
 
   return x;
 }
-

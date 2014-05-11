@@ -14,7 +14,7 @@ CDEFINES=-DLISH_VERSION=\"$(LISH_VERSION)\"           \
 
 CC=cc
 CFLAGS=-c -g -ggdb -std=gnu99 -Wall $(CDEFINES)
-LDFLAGS=-lm
+LDFLAGS=-lm -lgmp
 
 sourcesubdirs=$(shell find src -type d | grep -v "src$$" | awk '{gsub("src/","bin/",$$1); print $$1}'|xargs)
 rwildcard=$(foreach d, $(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))

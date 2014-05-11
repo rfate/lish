@@ -139,12 +139,93 @@ lval_t* builtin_tosym(lenv_t* e, lval_t* a) {
   return lval_str_tosym(a);
 }
 
-lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
+lval_t*
+builtin_bigint_op(lenv_t *e, lval_t *a, char *op)
+{
+  // Args may be int or float, so we must convert to bigint.
+  lval_t *args = lval_qexpr();
+
   for (int i = 0; i < a->data.expr.count; ++i) {
+    if (a->data.expr.cell[i]->type == LVAL_BIGINT) {
+      args = lval_add(args, lval_pop(a, i));
+      continue;
+    }
+
+    if (a->data.expr.cell[i]->type == LVAL_INT) {
+      lval_t *v = lval_bigint("0");
+      mpz_set_si(v->data.bignum, (long int) a->data.expr.cell[i]->data.num);
+      args = lval_add(args, v);
+      continue;
+    }
+
+    if (a->data.expr.cell[i]->type == LVAL_FLOAT) {
+      lval_t *v = lval_bigint("0");
+      mpz_set_d(v->data.bignum, a->data.expr.cell[i]->data.num);
+      args = lval_add(args, v);
+      continue;
+    }
+
+    lval_t *err = lval_err("Cannot operate on non-numberic type %s",
+      ltype_name(a->data.expr.cell[i]->type));
+
+    lval_del(a);
+    lval_del(args);
+
+    return err;
+  }
+
+  lval_del(a);
+
+  lval_t *x = lval_pop(args, 0);
+
+  // Unary negate and posit.
+  if (strcmp(op, "-") == 0 && args->data.expr.count == 0)
+    mpz_neg(x->data.bignum, x->data.bignum);
+  if (strcmp(op, "+") == 0 && args->data.expr.count == 0)
+    mpz_abs(x->data.bignum, x->data.bignum);
+
+  while (args->data.expr.count > 0) {
+    lval_t *y = lval_pop(args, 0);
+
+    if (strcmp(op, "+") == 0)
+      mpz_add(x->data.bignum, x->data.bignum, y->data.bignum);
+    if (strcmp(op, "-") == 0)
+      mpz_sub(x->data.bignum, x->data.bignum, y->data.bignum);
+
+    if (strcmp(op, "*") == 0)
+      mpz_mul(x->data.bignum, x->data.bignum, y->data.bignum);
+
+    if (strcmp(op, "/") == 0) {
+      if (mpz_cmp_d(y->data.bignum, 0) == 0) {
+        lval_del(x);
+        lval_del(y);
+    //    lval_del(args);
+        return lval_err("Division by zero.");
+      }
+    }
+
+    lval_del(y);
+  }
+
+  lval_del(args);
+
+  return x;
+}
+
+lval_t*
+builtin_op(lenv_t *e, lval_t *a, char *op)
+{
+  for (int i = 0; i < a->data.expr.count; ++i) {
+    // If _any_ number is a bigint, we must use the special builtin.
+    if (a->data.expr.cell[i]->type == LVAL_BIGINT) {
+      return builtin_bigint_op(e, a, op);
+    }
+
+    // Otherwise, it must be an int or float.
     LASSERT_ARG_IS_NUM(op, a, i);
   }
 
-  lval_t* x = lval_pop(a, 0);
+  lval_t *x = lval_pop(a, 0);
 
   // If sub with no args, perform negation.
   if (strcmp(op, "-") == 0 && a->data.expr.count == 0)
@@ -154,7 +235,7 @@ lval_t* builtin_op(lenv_t* e, lval_t* a, char* op) {
     x->data.num = (x->data.num < 0) ? -x->data.num : x->data.num;
 
   while (a->data.expr.count > 0) {
-    lval_t* y = lval_pop(a, 0);
+    lval_t *y = lval_pop(a, 0);
 
     if (strcmp(op, "+") == 0)
       x->data.num += y->data.num;

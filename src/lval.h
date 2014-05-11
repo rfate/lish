@@ -2,6 +2,7 @@
 #define _LISH_LVAL_H
 
 #include <stdint.h>
+#include <gmp.h>
 #include "mpc.h"
 
 struct lval_t;
@@ -15,6 +16,7 @@ enum {
   LVAL_ERR,
   LVAL_INT,
   LVAL_FLOAT,
+  LVAL_BIGINT,
   LVAL_BOOL,
   LVAL_STR,
   LVAL_SYM,
@@ -40,6 +42,8 @@ struct lval_t {
     char*    str;
     // error
     char*    err;
+
+    mpz_t bignum;
 
     // symbol, literal or otherwise
     struct {
