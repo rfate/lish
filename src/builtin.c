@@ -147,7 +147,7 @@ builtin_bigint_op(lenv_t *e, lval_t *a, char *op)
 
   for (int i = 0; i < a->data.expr.count; ++i) {
     if (a->data.expr.cell[i]->type == LVAL_BIGINT) {
-      args = lval_add(args, lval_pop(a, i));
+      args = lval_add(args, lval_copy(a->data.expr.cell[i]));
       continue;
     }
 
@@ -199,9 +199,22 @@ builtin_bigint_op(lenv_t *e, lval_t *a, char *op)
       if (mpz_cmp_d(y->data.bignum, 0) == 0) {
         lval_del(x);
         lval_del(y);
-    //    lval_del(args);
+        lval_del(args);
         return lval_err("Division by zero.");
       }
+
+      mpz_fdiv_q(x->data.bignum, x->data.bignum, y->data.bignum);
+    }
+
+    if (strcmp(op, "%") == 0) {
+      if (mpz_cmp_d(y->data.bignum, 0) == 0) {
+        lval_del(x);
+        lval_del(y);
+        lval_del(args);
+        return lval_err("Division by zero");
+      }
+
+      mpz_mod(x->data.bignum, x->data.bignum, y->data.bignum);
     }
 
     lval_del(y);
