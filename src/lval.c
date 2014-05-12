@@ -166,6 +166,7 @@ lval_truthy(lval_t *v)
     case LVAL_BIGINT:
     case LVAL_STR:
     case LVAL_FUN:
+    case LVAL_SYM:
       b = TRUE;
       break;
 
@@ -537,10 +538,10 @@ lval_eval_sexpr(lenv_t *e, lval_t *v)
     v->data.expr.cell[i] = lval_eval(e, v->data.expr.cell[i]);
   }
 
-  for (int i = 0; i < v->data.expr.count; ++i) {
-    if (v->data.expr.cell[i]->type == LVAL_ERR)
-      return lval_take(v, i);
-  }
+ // for (int i = 0; i < v->data.expr.count; ++i) {
+ //   if (v->data.expr.cell[i]->type == LVAL_ERR)
+ //     return lval_take(v, i);
+ // }
 
   if (v->data.expr.count == 0)
     return v;
@@ -550,18 +551,26 @@ lval_eval_sexpr(lenv_t *e, lval_t *v)
 
   // Ensure first lval is a function
   lval_t *f = lval_pop(v, 0);
-  if (f->type != LVAL_FUN) {
-    lval_t *err = lval_err("S-Expression starts with incorrect type. Expected %s, got %s.",
-      ltype_name(f->type), ltype_name(LVAL_FUN));
 
-    lval_del(f);
-    lval_del(v);
-
-    return err;
+  if (f->type == LVAL_FUN) {
+    return lval_call(e, f, v);
   }
 
-  lval_t *result = lval_call(e, f, v);
-  return result;
+  if (f->type == LVAL_SEXPR) {
+    return lval_eval_sexpr(e, f);
+  }
+
+  if (f->type == LVAL_ERR) {
+    return f;
+  }
+
+  lval_t *err = lval_err("S-Expression starts with incorrect type.%s.",
+      ltype_name(f->type));
+
+  lval_del(f);
+  lval_del(v);
+
+  return err;
 }
 
 lval_t*

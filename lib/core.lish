@@ -1,20 +1,3 @@
-# Function shorthand.
-(def @fun (lambda {f b} {
-  def (head f) (lambda (tail f) b)
-}))
-
-(def @assert (lambda {expr name} {
-  if (? (eval expr))
-    { } # It's fine. do nothing.
-    { (map {
-        { puts (error (concat "Assertion failed: " name)) }
-        { exit 1 }
-      } eval)
-    }
-}))
-
-# Some aliases.
-(def @λ  lambda)
 (def @!! ?)
 
 # Load other modules.

@@ -1,4 +1,6 @@
 #!/usr/bin/env lish
+(load "lib/test.lish" true)
+
 (puts "Running tests.")
 
 (def @test_names {

@@ -5,3 +5,4 @@
 (assert { == "e" (nth test_string 1) } "nth returns correct char")
 (assert { == 13 (len test_string)    } "len returns correct length")
 (assert { == @hello_world (tosym test_string_symbolizable) } "tosym symbolizes")
+(assert { ? (tosym test_string) } "tosymsomthing" )

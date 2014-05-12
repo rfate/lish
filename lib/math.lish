@@ -1,8 +1,9 @@
-# Constants
 (def @Math.PI  3.141592653589793)
 (def @Math.TAU (* 2 Math.PI))
 
-(def @Math.fact (λ {n} {
+#
+
+(def @Math.fact (lambda {n} {
   if (<= n 1)
     { 1 }
     { * n (Math.fact(- n 1)) }

@@ -1,0 +1,8 @@
+(def @assert (lambda {expr name} {
+  if (? (eval expr))
+    { true }
+    {
+      (puts (error (concat "Assertion failed: " name)) )
+      (exit 1)
+    }
+}))
