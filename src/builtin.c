@@ -176,7 +176,7 @@ builtin_bigint_op(lenv_t *e, lval_t *a, char *op)
       continue;
     }
 
-    lval_t *err = lval_err("Cannot operate on non-numberic type %s",
+    lval_t *err = lval_err("Cannot operate on non-numeric type %s",
       ltype_name(a->data.expr.cell[i]->type));
 
     lval_del(a);
@@ -192,8 +192,6 @@ builtin_bigint_op(lenv_t *e, lval_t *a, char *op)
   // Unary negate and posit.
   if (strcmp(op, "-") == 0 && args->data.expr.count == 0)
     mpz_neg(x->data.bignum, x->data.bignum);
-  if (strcmp(op, "+") == 0 && args->data.expr.count == 0)
-    mpz_abs(x->data.bignum, x->data.bignum);
 
   while (args->data.expr.count > 0) {
     lval_t *y = lval_pop(args, 0);
