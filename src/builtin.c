@@ -71,13 +71,19 @@ lval_t* builtin_type(lenv_t* e, lval_t* a) {
 }
 
 lval_t* builtin_concat(lenv_t* e, lval_t* a) {
-  LASSERT_ARG_COUNT("concat", a, 2);
-  LASSERT_ARG_TYPE("concat", a, 0, LVAL_STR);
-  LASSERT_ARG_TYPE("concat", a, 1, LVAL_STR);
+	LASSERT(a, a->data.expr.count >= 1,
+			"Builtin \"concat\" expected at least 1 argument, got %d",
+			a->data.expr.count);
 
-  char* str = malloc(strlen(a->data.expr.cell[0]->data.str) + strlen(a->data.expr.cell[1]->data.str) + 1);
+	char *str = malloc(strlen(a->data.expr.cell[0]->data.str) + 1);
   strcpy(str, a->data.expr.cell[0]->data.str);
-  strcat(str, a->data.expr.cell[1]->data.str);
+
+	for (int i = 1; i < a->data.expr.count; ++i) {
+		LASSERT_ARG_TYPE("concat", a, i, LVAL_STR);
+
+		str = (char*) realloc(str, strlen(str) + strlen(a->data.expr.cell[i]->data.str) + 1);
+		strcat(str, a->data.expr.cell[i]->data.str);
+	}
 
   lval_del(a);
   return lval_str(str);
