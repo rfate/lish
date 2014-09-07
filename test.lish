@@ -10,7 +10,7 @@
 
 (def @load_test (lambda {name} {
   (puts (concat "  - testing " name))
-  (load (concat (concat "test/" name) ".lish"))
+  (load (concat "test/" name ".lish"))
 }))
 
 (map test_names (lambda {name} {
