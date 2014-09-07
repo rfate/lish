@@ -95,25 +95,24 @@ lval_t* builtin_substr(lenv_t* e, lval_t* a) {
 
   lval_t* x;
 
-  // Don't know why this would be needed, but if provided
-  // only a string, return the full string.
+  // If provided a single string, return it in full.
   if (a->data.expr.count == 1) {
-    x = lval_copy(a->data.expr.cell[0]);
+		x = lval_pop(a, 0);
     lval_del(a);
     return x;
   }
 
-  LASSERT_ARG_IS_NUM("substr", a, 1);
+  LASSERT_ARG_TYPE("substr", a, 1, LVAL_INT);
 
   int length = strlen(a->data.expr.cell[0]->data.str);
   int start  = a->data.expr.cell[1]->data.num;
   int end;
 
   if (a->data.expr.count > 2) {
-    LASSERT_ARG_IS_NUM("substr", a, 2);
-    end = a->data.expr.cell[2]->data.num;
+    LASSERT_ARG_TYPE("substr", a, 2, LVAL_INT);
+    end = a->data.expr.cell[2]->data.num + 1;
   } else {
-    end = length - 1;
+    end = length;
   }
 
   if (start < 0 || end < 0) {

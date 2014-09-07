@@ -6,3 +6,6 @@
 (assert { == 13 (len test_string)    } "len returns correct length")
 (assert { == @hello_world (tosym test_string_symbolizable) } "tosym symbolizes")
 (assert { ! (? (tosym test_string)) } "tosym doesn't symbolize non-typable strings" )
+
+(assert { == "lo, world!" (substr test_string 3) } "substr start index" )
+(assert { == "lo, w" (substr test_string 3 7) } "substr start&end indices" )
