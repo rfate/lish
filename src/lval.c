@@ -339,7 +339,7 @@ lval_read_str(mpc_ast_t *t)
   char *unescaped = malloc(strlen(t->contents + 1) + 1);
   strcpy(unescaped, t->contents + 1);
 
-  unescaped = mpcf_escape(unescaped);
+  unescaped = mpcf_unescape(unescaped);
 
   lval_t *str = lval_str(unescaped);
   free(unescaped);
