@@ -438,11 +438,10 @@ lval_t* builtin_head(lenv_t* e, lval_t* a) {
   LASSERT_ARG_TYPE("head", a, 0, LVAL_QEXPR);
   LASSERT_NONEMPTY_LIST("head", a, 0);
 
-/*  lval_t* v = lval_take(a, 0);
-  while (v->data.expr.count > 1)
-    lval_del(lval_pop(v, 1));*/
-
   lval_t* v = lval_copy(a->data.expr.cell[0]->data.expr.cell[0]);
+	if (v->type == LVAL_SYM) {
+		v->data.sym.lit = TRUE;
+	}
 
   lval_del(a);
 
@@ -555,18 +554,24 @@ lval_t* builtin_var(lenv_t* e, lval_t* a, char* func) {
   LASSERT_ARG_COUNT(func, a, 2);
   LASSERT_ARG_TYPE(func, a, 0, LVAL_SYM);
 
-  if (strcmp(func, "=")   == 0)
+  if (strcmp(func, "=")   == 0) {
     lenv_set(e, a->data.expr.cell[0], a->data.expr.cell[1]);
-  if (strcmp(func, "def") == 0)
+	} else if (strcmp(func, "def") == 0) {
     lenv_def(e, a->data.expr.cell[0], a->data.expr.cell[1]);
+	}
 
   lval_del(a);
 
   return lval_sexpr();
 }
 
-lval_t* builtin_def(lenv_t* e, lval_t* v) { return builtin_var(e, v, "="); }
-lval_t* builtin_set(lenv_t* e, lval_t* v) { return builtin_var(e, v, "def");   }
+lval_t* builtin_def(lenv_t* e, lval_t* v) {
+	return builtin_var(e, v, "=");
+}
+
+lval_t* builtin_set(lenv_t* e, lval_t* v) {
+	return builtin_var(e, v, "def");
+}
 
 lval_t* builtin_puts(lenv_t* e, lval_t* v) {
   LASSERT_ARG_COUNT("puts", v, 1);

@@ -224,8 +224,9 @@ lval_eq(lval_t *x, lval_t *y)
 
     case LVAL_SEXPR:
     case LVAL_QEXPR:
-      if (x->data.expr.count != y->data.expr.count)
+      if (x->data.expr.count != y->data.expr.count) {
         return FALSE;
+			}
 
       for (int i = 0; i < x->data.expr.count; ++i) {
         if (!lval_eq(x->data.expr.cell[i], y->data.expr.cell[i]))
@@ -352,7 +353,9 @@ lval_read_table_pair(mpc_ast_t *t)
   lval_t *x = lval_qexpr();
 
   for (int i = 0; i < t->children_num; ++i) {
-    if (strcmp(t->children[i]->contents, "=") == 0)  { continue; }
+    if (strcmp(t->children[i]->contents, "=") == 0) {
+			continue;
+		}
 
     lval_t *v = lval_read(t->children[i]);
 
@@ -381,29 +384,37 @@ lval_read_table(mpc_ast_t *t)
 lval_t*
 lval_read(mpc_ast_t *t)
 {
-  if (strstr(t->tag, "nil"))
+  if (strstr(t->tag, "nil")) {
     return lval_nil();
+	}
 
-  if (strstr(t->tag, "integer"))
+  if (strstr(t->tag, "integer")) {
     return lval_read_int(t);
+	}
 
-  if (strstr(t->tag, "float"))
+  if (strstr(t->tag, "float")) {
     return lval_read_float(t);
+	}
 
-  if (strstr(t->tag, "boolean"))
+  if (strstr(t->tag, "boolean")) {
     return lval_read_bool(t);
+	}
 
-  if (strstr(t->tag, "litsymbol"))
+  if (strstr(t->tag, "litsymbol")) {
     return lval_sym(t->children[1]->contents, TRUE);
+	}
 
-  if (strstr(t->tag, "symbol") || strstr(t->tag, "operator"))
+  if (strstr(t->tag, "symbol") || strstr(t->tag, "operator")) {
     return lval_sym(t->contents, FALSE);
+	}
 
-  if (strstr(t->tag, "string"))
+  if (strstr(t->tag, "string")) {
     return lval_read_str(t);
+	}
 
-  if (strstr(t->tag, "table"))
+  if (strstr(t->tag, "table")) {
     return lval_read_table(t);
+	}
 
   lval_t *x = NULL;
   if (strcmp(t->tag, ">") == 0) { x = lval_sexpr(); }
@@ -501,10 +512,11 @@ lval_print_r(lval_t *v, int root)
       }
       break;
     case LVAL_SEXPR:
-      if (root)
+      if (root) {
         lval_expr_print_r(v);
-      else
+			} else {
         lval_expr_print(v, '(', ')');
+			}
       break;
     case LVAL_QEXPR:
       lval_expr_print(v, '{', '}');
@@ -543,15 +555,18 @@ lval_eval_sexpr(lenv_t *e, lval_t *v)
  //     return lval_take(v, i);
  // }
 
-  if (v->data.expr.count == 0)
+  if (v->data.expr.count == 0) {
     return v;
+	}
 
-  if (v->data.expr.count == 1)
+	// If single element, reduce.
+  if (v->data.expr.count == 1) {
     return lval_take(v, 0);
+	}
 
-  // Ensure first lval is a function
   lval_t *f = lval_pop(v, 0);
 
+  // Ensure first lval is a function
   if (f->type == LVAL_FUN) {
     return lval_call(e, f, v);
   }
@@ -583,8 +598,9 @@ lval_eval(lenv_t *e, lval_t *v)
     return x;
   }
 
-  if (v->type == LVAL_SEXPR)
+  if (v->type == LVAL_SEXPR) {
     return lval_eval_sexpr(e, v);
+	}
 
   return v;
 }
@@ -592,8 +608,9 @@ lval_eval(lenv_t *e, lval_t *v)
 lval_t*
 lval_copy(lval_t *v)
 {
-  if (v->type == LVAL_TABLE)
+  if (v->type == LVAL_TABLE) {
     return lval_table_copy(v);
+	}
 
   lval_t *x = malloc(sizeof(lval_t));
   x->type = v->type;
@@ -676,8 +693,9 @@ lval_take(lval_t *v, int i)
 lval_t*
 lval_join(lval_t *x, lval_t *y)
 {
-  while (y->data.expr.count)
+  while (y->data.expr.count) {
     x = lval_add(x, lval_pop(y, 0));
+	}
 
   lval_del(y);
 
