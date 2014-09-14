@@ -43,7 +43,7 @@ lval_bool(int x)
 {
   lval_t *v = malloc(sizeof(lval_t));
   v->type     = LVAL_BOOL;
-  v->data.num = (x != FALSE);
+  v->num = (x != FALSE);
 
   return v;
 }
@@ -57,10 +57,10 @@ lval_err(char *fmt, ...)
   va_list va;
   va_start(va, fmt);
 
-  v->data.err = malloc(512);
-  vsnprintf(v->data.err, 511, fmt, va);
+  v->err = malloc(512);
+  vsnprintf(v->err, 511, fmt, va);
 
-  v->data.err = realloc(v->data.err, strlen(v->data.err) + 1);
+  v->err = realloc(v->err, strlen(v->err) + 1);
 
   va_end(va);
 
@@ -72,9 +72,9 @@ lval_sym(char *sym, int lit)
 {
   lval_t *v = malloc(sizeof(lval_t));
   v->type          = LVAL_SYM;
-  v->data.sym.lit  = lit;
-  v->data.sym.name = malloc(strlen(sym) + 1);
-  strcpy(v->data.sym.name, sym);
+  v->sym.lit  = lit;
+  v->sym.name = malloc(strlen(sym) + 1);
+  strcpy(v->sym.name, sym);
 
   return v;
 }
@@ -84,7 +84,7 @@ lval_fun(lbuiltin func)
 {
   lval_t *v = malloc(sizeof(lval_t));
   v->type              = LVAL_FUN;
-  v->data.func.builtin = func;
+  v->func.builtin = func;
 
   return v;
 }
@@ -94,8 +94,8 @@ lval_sexpr(void)
 {
   lval_t *v = malloc(sizeof(lval_t));
   v->type            = LVAL_SEXPR;
-  v->data.expr.count = 0;
-  v->data.expr.cell  = NULL;
+  v->expr.count = 0;
+  v->expr.cell  = NULL;
 
   return v;
 }
@@ -105,10 +105,10 @@ lval_lambda(lval_t *formals, lval_t *body)
 {
   lval_t *v = malloc(sizeof(lval_t));
   v->type              = LVAL_FUN;
-  v->data.func.env     = lenv_new();
-  v->data.func.builtin = NULL;
-  v->data.func.formals = formals;
-  v->data.func.body    = body;
+  v->func.env     = lenv_new();
+  v->func.builtin = NULL;
+  v->func.formals = formals;
+  v->func.body    = body;
 
   return v;
 }
@@ -119,7 +119,7 @@ lval_del(lval_t *v)
 {
   switch (v->type) {
     case LVAL_BIGINT:
-      mpz_clear(v->data.bignum);
+      mpz_clear(v->bignum);
       return;
 
     case LVAL_TABLE:
@@ -127,24 +127,24 @@ lval_del(lval_t *v)
       return;
 
     case LVAL_FUN:
-      if (!v->data.func.builtin) {
-        lenv_del(v->data.func.env);
-        lval_del(v->data.func.formals);
-        lval_del(v->data.func.body);
+      if (!v->func.builtin) {
+        lenv_del(v->func.env);
+        lval_del(v->func.formals);
+        lval_del(v->func.body);
       }
       break;
 
-    case LVAL_STR: free(v->data.str); break;
-    case LVAL_ERR: free(v->data.err); break;
-    case LVAL_SYM: free(v->data.sym.name); break;
+    case LVAL_STR: free(v->str); break;
+    case LVAL_ERR: free(v->err); break;
+    case LVAL_SYM: free(v->sym.name); break;
 
     case LVAL_SEXPR:
     case LVAL_QEXPR:
-      for (int i = 0; i < v->data.expr.count; ++i) {
-        lval_del(v->data.expr.cell[i]);
+      for (int i = 0; i < v->expr.count; ++i) {
+        lval_del(v->expr.cell[i]);
       }
 
-      free(v->data.expr.cell);
+      free(v->expr.cell);
       break;
   }
 
@@ -172,11 +172,11 @@ lval_truthy(lval_t *v)
 
     case LVAL_SEXPR:
     case LVAL_QEXPR:
-      b = (v->data.expr.count > 0);
+      b = (v->expr.count > 0);
       break;
 
     case LVAL_BOOL:
-      b = v->data.num;
+      b = v->num;
       break;
 
     default:
@@ -192,7 +192,7 @@ lval_eq(lval_t *x, lval_t *y)
 {
   if ((x->type == LVAL_INT || x->type == LVAL_FLOAT)
    && (y->type == LVAL_INT || y->type == LVAL_FLOAT)) {
-    return (x->data.num == y->data.num);
+    return (x->num == y->num);
   } else if (x->type != y->type) {
     return FALSE;
   }
@@ -202,48 +202,48 @@ lval_eq(lval_t *x, lval_t *y)
       return TRUE;
 
     case LVAL_BOOL:
-      return (x->data.num == y->data.num);
+      return (x->num == y->num);
 
     case LVAL_STR:
-      return (strcmp(x->data.str, y->data.str) == 0);
+      return (strcmp(x->str, y->str) == 0);
 
     case LVAL_ERR:
-      return (strcmp(x->data.err, y->data.err) == 0);
+      return (strcmp(x->err, y->err) == 0);
 
     case LVAL_SYM:
-      return (strcmp(x->data.sym.name, y->data.sym.name) == 0
-            && x->data.sym.lit == y->data.sym.lit);
+      return (strcmp(x->sym.name, y->sym.name) == 0
+            && x->sym.lit == y->sym.lit);
 
     case LVAL_FUN:
-      if (x->data.func.builtin || y->data.func.builtin) {
-        return (x->data.func.builtin == y->data.func.builtin);
+      if (x->func.builtin || y->func.builtin) {
+        return (x->func.builtin == y->func.builtin);
       } else {
-        return lval_eq(x->data.func.formals, y->data.func.formals)
-            && lval_eq(x->data.func.body,    y->data.func.body);
+        return lval_eq(x->func.formals, y->func.formals)
+            && lval_eq(x->func.body,    y->func.body);
       }
 
     case LVAL_SEXPR:
     case LVAL_QEXPR:
-      if (x->data.expr.count != y->data.expr.count) {
+      if (x->expr.count != y->expr.count) {
         return FALSE;
 			}
 
-      for (int i = 0; i < x->data.expr.count; ++i) {
-        if (!lval_eq(x->data.expr.cell[i], y->data.expr.cell[i]))
+      for (int i = 0; i < x->expr.count; ++i) {
+        if (!lval_eq(x->expr.cell[i], y->expr.cell[i]))
           return FALSE;
       }
 
       return TRUE;
 
     case LVAL_TABLE:
-      if (x->data.table.count != y->data.table.count)
+      if (x->table.count != y->table.count)
         return FALSE;
 
-      for (int i = 0; i < x->data.table.count; ++i) {
-        if (!lval_eq(x->data.table.keys[i], y->data.table.keys[i]))
+      for (int i = 0; i < x->table.count; ++i) {
+        if (!lval_eq(x->table.keys[i], y->table.keys[i]))
           return FALSE;
 
-        if (!lval_eq(x->data.table.vals[i], y->data.table.vals[i]))
+        if (!lval_eq(x->table.vals[i], y->table.vals[i]))
           return FALSE;
       }
 
@@ -257,9 +257,9 @@ lval_eq(lval_t *x, lval_t *y)
 lval_t*
 lval_add(lval_t *v, lval_t *x)
 {
-  v->data.expr.count++;
-  v->data.expr.cell = realloc(v->data.expr.cell, sizeof(lval_t*) * v->data.expr.count);
-  v->data.expr.cell[v->data.expr.count-1] = x;
+  v->expr.count++;
+  v->expr.cell = realloc(v->expr.cell, sizeof(lval_t*) * v->expr.count);
+  v->expr.cell[v->expr.count-1] = x;
 
   return v;
 }
@@ -267,23 +267,23 @@ lval_add(lval_t *v, lval_t *x)
 lval_t*
 lval_call(lenv_t *e, lval_t *f, lval_t *a)
 {
-  if (f->data.func.builtin)
-    return f->data.func.builtin(e, a);
+  if (f->func.builtin)
+    return f->func.builtin(e, a);
 
-  int given = a->data.expr.count;
-  int total = f->data.func.formals->data.expr.count;
+  int given = a->expr.count;
+  int total = f->func.formals->expr.count;
 
-  while (a->data.expr.count) {
-    if (f->data.func.formals->data.expr.count == 0) {
+  while (a->expr.count) {
+    if (f->func.formals->expr.count == 0) {
       lval_del(a);
       lval_err("Function passed too many arguments. Expected %d, got %d.",
         total, given);
     }
 
-    lval_t *sym = lval_pop(f->data.func.formals, 0);
+    lval_t *sym = lval_pop(f->func.formals, 0);
     lval_t *val = lval_pop(a, 0);
 
-    lenv_set(f->data.func.env, sym, val);
+    lenv_set(f->func.env, sym, val);
 
     lval_del(sym);
     lval_del(val);
@@ -291,10 +291,10 @@ lval_call(lenv_t *e, lval_t *f, lval_t *a)
 
   lval_del(a);
 
-  if (f->data.func.formals->data.expr.count == 0) {
-    f->data.func.env->parent = e;
+  if (f->func.formals->expr.count == 0) {
+    f->func.env->parent = e;
 
-    return builtin_eval(f->data.func.env, lval_add(lval_sexpr(), lval_copy(f->data.func.body)));
+    return builtin_eval(f->func.env, lval_add(lval_sexpr(), lval_copy(f->func.body)));
   }
 
   return lval_copy(f);
@@ -373,7 +373,7 @@ lval_read_table(mpc_ast_t *t)
   for (int i = 0; i < t->children_num; ++i) {
     if (strstr(t->children[i]->tag, "tablepair")) {
       lval_t *p = lval_read_table_pair(t->children[i]);
-      lval_table_set(x, p->data.expr.cell[0], p->data.expr.cell[1]);
+      lval_table_set(x, p->expr.cell[0], p->expr.cell[1]);
       lval_del(p);
     }
   }
@@ -437,11 +437,11 @@ lval_read(mpc_ast_t *t)
 void
 lval_expr_print_r(lval_t *v)
 {
-  for (int i = 0; i < v->data.expr.count; ++i) {
-    lval_print(v->data.expr.cell[i]);
+  for (int i = 0; i < v->expr.count; ++i) {
+    lval_print(v->expr.cell[i]);
 
     // Print trailing space if not last element.
-    if (i != v->data.expr.count-1) {
+    if (i != v->expr.count-1) {
       putchar(' ');
     }
   }
@@ -461,10 +461,10 @@ void
 lval_float_print(lval_t *v)
 {
   // ends in zero, print with a trailing zero
-  if (fmod(v->data.num, 1) == 0) {
-    printf("%.01lf", v->data.num);
+  if (fmod(v->num, 1) == 0) {
+    printf("%.01lf", v->num);
   } else {
-    printf("%g", v->data.num);
+    printf("%g", v->num);
   }
 }
 
@@ -476,38 +476,38 @@ lval_print_r(lval_t *v, int root)
       printf("nil");
       break;
     case LVAL_INT:
-      printf("%ld", (long int) v->data.num);
+      printf("%ld", (long int) v->num);
       break;
     case LVAL_FLOAT:
       lval_float_print(v);
       break;
     case LVAL_BIGINT:
-      gmp_printf("%Zd", v->data.bignum);
+      gmp_printf("%Zd", v->bignum);
       break;
     case LVAL_BOOL:
-      printf("%s", (v->data.num == FALSE) ? "false" : "true");
+      printf("%s", (v->num == FALSE) ? "false" : "true");
       break;
     case LVAL_STR:
       lval_str_print(v);
       break;
     case LVAL_ERR:
-      printf("Error: %s", v->data.err);
+      printf("Error: %s", v->err);
       break;
     case LVAL_SYM:
-      if (v->data.sym.lit) {
-        printf("@%s", v->data.sym.name);
+      if (v->sym.lit) {
+        printf("@%s", v->sym.name);
       } else {
-        printf("%s", v->data.sym.name);
+        printf("%s", v->sym.name);
       }
       break;
     case LVAL_FUN:
-      if (v->data.func.builtin) {
+      if (v->func.builtin) {
         printf("<builtin>");
       } else {
         printf("(lambda ");
-        lval_print(v->data.func.formals);
+        lval_print(v->func.formals);
         putchar(' ');
-        lval_print(v->data.func.body);
+        lval_print(v->func.body);
         putchar(')');
       }
       break;
@@ -546,21 +546,21 @@ lval_println(lval_t *v)
 lval_t*
 lval_eval_sexpr(lenv_t *e, lval_t *v)
 {
-  for (int i = 0; i < v->data.expr.count; ++i) {
-    v->data.expr.cell[i] = lval_eval(e, v->data.expr.cell[i]);
+  for (int i = 0; i < v->expr.count; ++i) {
+    v->expr.cell[i] = lval_eval(e, v->expr.cell[i]);
   }
 
- // for (int i = 0; i < v->data.expr.count; ++i) {
- //   if (v->data.expr.cell[i]->type == LVAL_ERR)
+ // for (int i = 0; i < v->expr.count; ++i) {
+ //   if (v->expr.cell[i]->type == LVAL_ERR)
  //     return lval_take(v, i);
  // }
 
-  if (v->data.expr.count == 0) {
+  if (v->expr.count == 0) {
     return v;
 	}
 
 	// If single element, reduce.
-  if (v->data.expr.count == 1) {
+  if (v->expr.count == 1) {
     return lval_take(v, 0);
 	}
 
@@ -619,45 +619,45 @@ lval_copy(lval_t *v)
     case LVAL_INT:
     case LVAL_FLOAT:
     case LVAL_BOOL:
-      x->data.num = v->data.num;
+      x->num = v->num;
       break;
     case LVAL_BIGINT:
-      mpz_init_set(x->data.bignum, v->data.bignum);
+      mpz_init_set(x->bignum, v->bignum);
       break;
     case LVAL_FUN:
-      if (v->data.func.builtin) {
-        x->data.func.builtin = v->data.func.builtin;
+      if (v->func.builtin) {
+        x->func.builtin = v->func.builtin;
       } else {
-        x->data.func.env     = lenv_copy(v->data.func.env);
-        x->data.func.builtin = NULL;
-        x->data.func.formals = lval_copy(v->data.func.formals);
-        x->data.func.body    = lval_copy(v->data.func.body);
+        x->func.env     = lenv_copy(v->func.env);
+        x->func.builtin = NULL;
+        x->func.formals = lval_copy(v->func.formals);
+        x->func.body    = lval_copy(v->func.body);
       }
       break;
 
     case LVAL_STR:
-      x->data.str = malloc(strlen(v->data.str) + 1);
-      strcpy(x->data.str, v->data.str);
+      x->str = malloc(strlen(v->str) + 1);
+      strcpy(x->str, v->str);
       break;
 
     case LVAL_ERR:
-      x->data.err = malloc(strlen(v->data.err) + 1);
-      strcpy(x->data.err, v->data.err);
+      x->err = malloc(strlen(v->err) + 1);
+      strcpy(x->err, v->err);
       break;
 
     case LVAL_SYM:
-      x->data.sym.lit  = v->data.sym.lit;
-      x->data.sym.name = malloc(strlen(v->data.sym.name) + 1);
-      strcpy(x->data.sym.name, v->data.sym.name);
+      x->sym.lit  = v->sym.lit;
+      x->sym.name = malloc(strlen(v->sym.name) + 1);
+      strcpy(x->sym.name, v->sym.name);
       break;
 
     case LVAL_SEXPR:
     case LVAL_QEXPR:
-      x->data.expr.count = v->data.expr.count;
-      x->data.expr.cell  = malloc(sizeof(lval_t*) * v->data.expr.count);
+      x->expr.count = v->expr.count;
+      x->expr.cell  = malloc(sizeof(lval_t*) * v->expr.count);
 
-      for (int i = 0; i < v->data.expr.count; ++i) {
-        x->data.expr.cell[i] = lval_copy(v->data.expr.cell[i]);
+      for (int i = 0; i < v->expr.count; ++i) {
+        x->expr.cell[i] = lval_copy(v->expr.cell[i]);
       }
       break;
   }
@@ -668,15 +668,15 @@ lval_copy(lval_t *v)
 lval_t*
 lval_pop(lval_t *v, int i)
 {
-  lval_t *x = v->data.expr.cell[i];
+  lval_t *x = v->expr.cell[i];
 
-  memmove(&v->data.expr.cell[i], &v->data.expr.cell[i+1],
-      sizeof(lval_t*) * (v->data.expr.count-i-1));
+  memmove(&v->expr.cell[i], &v->expr.cell[i+1],
+      sizeof(lval_t*) * (v->expr.count-i-1));
 
-  v->data.expr.count--;
+  v->expr.count--;
 
-  v->data.expr.cell = realloc(v->data.expr.cell,
-      sizeof(lval_t*) * v->data.expr.count);
+  v->expr.cell = realloc(v->expr.cell,
+      sizeof(lval_t*) * v->expr.count);
 
   return x;
 }
@@ -693,7 +693,7 @@ lval_take(lval_t *v, int i)
 lval_t*
 lval_join(lval_t *x, lval_t *y)
 {
-  while (y->data.expr.count) {
+  while (y->expr.count) {
     x = lval_add(x, lval_pop(y, 0));
 	}
 

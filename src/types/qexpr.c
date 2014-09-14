@@ -6,8 +6,8 @@ lval_qexpr(void)
 {
   lval_t *v = malloc(sizeof(lval_t));
   v->type            = LVAL_QEXPR;
-  v->data.expr.count = 0;
-  v->data.expr.cell  = NULL;
+  v->expr.count = 0;
+  v->expr.cell  = NULL;
 
   return v;
 }
@@ -15,7 +15,7 @@ lval_qexpr(void)
 lval_t*
 lval_qexpr_len(lval_t *a)
 {
-  lval_t *x = lval_int(a->data.expr.cell[0]->data.expr.count);
+  lval_t *x = lval_int(a->expr.cell[0]->expr.count);
 
   lval_del(a);
   return x;
@@ -24,8 +24,8 @@ lval_qexpr_len(lval_t *a)
 lval_t*
 lval_qexpr_nth(lval_t *a)
 {
-  int length = a->data.expr.cell[0]->data.expr.count;
-  long int i = a->data.expr.cell[1]->data.num;
+  int length = a->expr.cell[0]->expr.count;
+  long int i = a->expr.cell[1]->num;
 
   lval_t *x;
 

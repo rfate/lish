@@ -7,9 +7,9 @@ lval_table(void)
 {
   lval_t *v = malloc(sizeof(lval_t));
   v->type             = LVAL_TABLE;
-  v->data.table.count = 0;
-  v->data.table.keys  = NULL;
-  v->data.table.vals  = NULL;
+  v->table.count = 0;
+  v->table.keys  = NULL;
+  v->table.vals  = NULL;
 
   return v;
 }
@@ -17,13 +17,13 @@ lval_table(void)
 void
 lval_table_del(lval_t *v)
 {
-  for (int i = 0; i < v->data.table.count; ++i) {
-    lval_del(v->data.table.keys[i]);
-    lval_del(v->data.table.vals[i]);
+  for (int i = 0; i < v->table.count; ++i) {
+    lval_del(v->table.keys[i]);
+    lval_del(v->table.vals[i]);
   }
 
-  free(v->data.table.keys);
-  free(v->data.table.vals);
+  free(v->table.keys);
+  free(v->table.vals);
   free(v);
 }
 
@@ -32,14 +32,14 @@ lval_table_copy(lval_t *v)
 {
   lval_t* n = malloc(sizeof(lval_t));
   n->type             = LVAL_TABLE;
-  n->data.table.count = v->data.table.count;
+  n->table.count = v->table.count;
 
-  n->data.table.keys = malloc(sizeof(lval_t*) * n->data.table.count);
-  n->data.table.vals = malloc(sizeof(lval_t*) * n->data.table.count);
+  n->table.keys = malloc(sizeof(lval_t*) * n->table.count);
+  n->table.vals = malloc(sizeof(lval_t*) * n->table.count);
 
-  for (int i = 0; i < n->data.table.count; ++i) {
-    n->data.table.keys[i] = lval_copy(v->data.table.keys[i]);
-    n->data.table.vals[i] = lval_copy(v->data.table.vals[i]);
+  for (int i = 0; i < n->table.count; ++i) {
+    n->table.keys[i] = lval_copy(v->table.keys[i]);
+    n->table.vals[i] = lval_copy(v->table.vals[i]);
   }
 
   return n;
@@ -48,20 +48,20 @@ lval_table_copy(lval_t *v)
 void
 lval_table_set(lval_t *t, lval_t *k, lval_t *v)
 {
-  for (int i = 0; i < t->data.table.count; ++i) {
-    if (lval_eq(t->data.table.keys[i], k)) {
-      lval_del(t->data.table.vals[i]);
-      t->data.table.vals[i] = lval_copy(v);
+  for (int i = 0; i < t->table.count; ++i) {
+    if (lval_eq(t->table.keys[i], k)) {
+      lval_del(t->table.vals[i]);
+      t->table.vals[i] = lval_copy(v);
       return;
     }
   }
 
-  t->data.table.count++;
-  t->data.table.keys = realloc(t->data.table.keys, sizeof(lval_t*) * t->data.table.count);
-  t->data.table.vals = realloc(t->data.table.vals, sizeof(lval_t*) * t->data.table.count);
+  t->table.count++;
+  t->table.keys = realloc(t->table.keys, sizeof(lval_t*) * t->table.count);
+  t->table.vals = realloc(t->table.vals, sizeof(lval_t*) * t->table.count);
 
-  t->data.table.keys[t->data.table.count - 1] = lval_copy(k);
-  t->data.table.vals[t->data.table.count - 1] = lval_copy(v);
+  t->table.keys[t->table.count - 1] = lval_copy(k);
+  t->table.vals[t->table.count - 1] = lval_copy(v);
 }
 
 lval_t*
@@ -69,9 +69,9 @@ lval_table_get(lval_t *t, lval_t *k)
 {
   lval_t *x = NULL;
 
-  for (int i = 0; i < t->data.table.count; ++i) {
-    if (lval_eq(k, t->data.table.keys[i])) {
-      x = lval_copy(t->data.table.vals[i]);
+  for (int i = 0; i < t->table.count; ++i) {
+    if (lval_eq(k, t->table.keys[i])) {
+      x = lval_copy(t->table.vals[i]);
       break;
     }
   }
@@ -87,14 +87,14 @@ lval_table_print(lval_t* v)
 {
   putchar('[');
 
-  for (int i = 0; i < v->data.table.count; ++i) {
+  for (int i = 0; i < v->table.count; ++i) {
     if (i > 0)
       putchar(',');
 
     putchar(' ');
-    lval_print(v->data.table.keys[i]);
+    lval_print(v->table.keys[i]);
     printf(" = ");
-    lval_print(v->data.table.vals[i]);
+    lval_print(v->table.vals[i]);
   }
 
   printf(" ]");
@@ -104,8 +104,8 @@ lval_t*
 lval_table_nth(lval_t *a)
 {
   lval_t *x;
-  int length = a->data.expr.cell[0]->data.table.count;
-  long int i = a->data.expr.cell[1]->data.num;
+  int length = a->expr.cell[0]->table.count;
+  long int i = a->expr.cell[1]->num;
 
   // If negative index, check backwards.
   if (i < 0) {
@@ -116,7 +116,7 @@ lval_table_nth(lval_t *a)
   if (i >= length || i < 0) {
     x = lval_nil();
   } else {
-    x = lval_copy(a->data.expr.cell[0]->data.table.vals[i]);
+    x = lval_copy(a->expr.cell[0]->table.vals[i]);
   }
 
   lval_del(a);
@@ -126,7 +126,7 @@ lval_table_nth(lval_t *a)
 lval_t*
 lval_table_el(lval_t *a)
 {
-  lval_t *x = lval_table_get(a->data.expr.cell[0], a->data.expr.cell[1]);
+  lval_t *x = lval_table_get(a->expr.cell[0], a->expr.cell[1]);
 
   lval_del(a);
   return x;
@@ -135,7 +135,7 @@ lval_table_el(lval_t *a)
 lval_t*
 lval_table_len(lval_t *a)
 {
-  lval_t *x = lval_int(a->data.expr.cell[0]->data.table.count);
+  lval_t *x = lval_int(a->expr.cell[0]->table.count);
 
   lval_del(a);
   return x;

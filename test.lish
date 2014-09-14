@@ -14,10 +14,7 @@
 }))
 
 (map test_names (lambda {name} {
-  (if (load_test name)
-    { } # all good!
-    { exit 1 }
-  )
+	load_test name
 }))
 
 (puts "Done!")

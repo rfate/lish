@@ -71,7 +71,7 @@ struct lval_t {
       struct lval_t **keys;
       struct lval_t **vals;
     } table;
-  } data;
+  };
 };
 #pragma pack(pop)
 

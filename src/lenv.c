@@ -39,10 +39,10 @@ lenv_t* lenv_copy(lenv_t* e) {
 }
 
 lval_t* lenv_get(lenv_t* e, lval_t* k) {
-  if (k->type == LVAL_SYM && k->data.sym.lit)
+  if (k->type == LVAL_SYM && k->sym.lit)
     return lval_copy(k);
 
-  char* key = (k->type == LVAL_STR) ? k->data.str : k->data.sym.name;
+  char* key = (k->type == LVAL_STR) ? k->str : k->sym.name;
 
   for (int i = 0; i < e->count; ++i) {
     if (strcmp(e->syms[i], key) == 0)
@@ -64,7 +64,7 @@ void lenv_def(lenv_t* e, lval_t* k, lval_t* v) {
 }
 
 void lenv_set(lenv_t* e, lval_t* k, lval_t* v) {
-  char* key = (k->type == LVAL_STR) ? k->data.str : k->data.sym.name;
+  char* key = (k->type == LVAL_STR) ? k->str : k->sym.name;
 
   for (int i = 0; i < e->count; ++i) {
     if (strcmp(e->syms[i], key) == 0) {

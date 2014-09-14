@@ -2,7 +2,7 @@
   if (? (eval expr))
     { true }
     {
-      (puts (error (concat "Assertion failed: " name)) )
-      (exit 1)
+      (puts (concat "Assertion failed: " name))
+			false
     }
 }))
